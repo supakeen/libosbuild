@@ -326,4 +326,10 @@ mod tests {
         let result = 2 + 2;
         assert_eq!(result, 4);
     }
+
+    #[test]
+    fn it_works_better() {
+        let result = 2 + 4;
+        assert_eq!(result, 6);
+    }
 }
