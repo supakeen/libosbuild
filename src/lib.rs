@@ -46,6 +46,8 @@ pub mod module {
         /// usually an AF_UNIX socket set to SOCK_DGRAM but premature abstraction has led to
         /// this being swappable if ever necessary (say: AF_INET + SOCK_STREAM).
         pub mod transport {
+            use log::*;
+
             use std::os::unix::net::UnixDatagram;
 
             pub enum TransportError {
@@ -60,7 +62,7 @@ pub mod module {
             }
 
             pub trait Transport {
-                fn open(&self, path: &str) -> Result<(), TransportError>;
+                fn open(&mut self, path: &str) -> Result<(), TransportError>;
                 fn close(&self) -> Result<(), TransportError>;
 
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError>;
@@ -73,6 +75,7 @@ pub mod module {
             }
 
             pub struct UnixSocket {
+                path: Option<String>,
                 socket: UnixDatagram,
             }
 
@@ -80,14 +83,20 @@ pub mod module {
                 fn new_client() -> Result<Self, TransportError> {
                     Ok(Self {
                         socket: UnixDatagram::unbound()?,
+                        path: None,
                     })
                 }
 
-                fn open(&self, path: &str) -> Result<(), TransportError> {
+                fn open(&mut self, path: &str) -> Result<(), TransportError> {
+                    self.path = Some(path.to_string());
+
+                    debug!("UnixSocket.open: {:?}", path);
+
                     Ok(self.socket.connect(path)?)
                 }
 
                 fn close(&self) -> Result<(), TransportError> {
+                    debug!("UnixSocket.close: {:?}", self.path);
                     Ok(())
                 }
 
@@ -256,18 +265,18 @@ pub mod module {
         }
 
         pub trait Channel {
-            fn open(&self, path: &str) -> Result<(), ChannelError>;
+            fn open(&mut self, path: &str) -> Result<(), ChannelError>;
             fn close(&self) -> Result<(), ChannelError>;
         }
 
         /// The CommandChannel is used to receive commands from the host system.
         pub struct CommandChannel<'a> {
-            transport: &'a dyn transport::Transport,
-            _protocol: &'a dyn protocol::Protocol,
+            transport: &'a mut dyn transport::Transport,
+            _protocol: &'a mut dyn protocol::Protocol,
         }
 
         impl Channel for CommandChannel<'_> {
-            fn open(&self, path: &str) -> Result<(), ChannelError> {
+            fn open(&mut self, path: &str) -> Result<(), ChannelError> {
                 self.transport.open(path)?;
                 Ok(())
             }
@@ -280,12 +289,12 @@ pub mod module {
 
         /// The LogChannel is used to send logs back to the host system.
         pub struct LogChannel<'a> {
-            transport: &'a dyn transport::Transport,
-            _protocol: &'a dyn protocol::Protocol,
+            transport: &'a mut dyn transport::Transport,
+            _protocol: &'a mut dyn protocol::Protocol,
         }
 
         impl Channel for LogChannel<'_> {
-            fn open(&self, path: &str) -> Result<(), ChannelError> {
+            fn open(&mut self, path: &str) -> Result<(), ChannelError> {
                 self.transport.open(path)?;
                 Ok(())
             }
@@ -298,12 +307,12 @@ pub mod module {
 
         /// The ProgressChannel is used send progress information back to the host system.
         pub struct ProgressChannel<'a> {
-            transport: &'a dyn transport::Transport,
-            _protocol: &'a dyn protocol::Protocol,
+            transport: &'a mut dyn transport::Transport,
+            _protocol: &'a mut dyn protocol::Protocol,
         }
 
         impl Channel for ProgressChannel<'_> {
-            fn open(&self, path: &str) -> Result<(), ChannelError> {
+            fn open(&mut self, path: &str) -> Result<(), ChannelError> {
                 self.transport.open(path)?;
                 Ok(())
             }
