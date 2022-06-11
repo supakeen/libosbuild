@@ -103,14 +103,22 @@ pub mod module {
 
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
                     let size = self.socket.recv(buf)?;
-                    debug!("UnixSocket.recv: recv {:?} bytes from {:?}", size, self.path);
+
+                    debug!(
+                        "UnixSocket.recv: recv {:?} bytes from {:?}",
+                        size, self.path
+                    );
 
                     Ok(size)
                 }
 
                 fn send(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
                     let size = self.socket.send(buf)?;
-                    debug!("UnixSocket.recv: sent {:?} bytes from {:?}", size, self.path);
+
+                    debug!(
+                        "UnixSocket.recv: sent {:?} bytes from {:?}",
+                        size, self.path
+                    );
 
                     Ok(size)
                 }
@@ -166,7 +174,7 @@ pub mod module {
                 use super::message::*;
 
                 pub enum EncodingError {
-                    ParseError(serde_json::Error)
+                    ParseError(serde_json::Error),
                 }
 
                 impl From<serde_json::Error> for EncodingError {
