@@ -97,15 +97,22 @@ pub mod module {
 
                 fn close(&self) -> Result<(), TransportError> {
                     debug!("UnixSocket.close: {:?}", self.path);
+
                     Ok(())
                 }
 
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
-                    Ok(self.socket.recv(buf)?)
+                    let size = self.socket.recv(buf)?;
+                    debug!("UnixSocket.recv: recv {:?} bytes from {:?}", size, self.path);
+
+                    Ok(size)
                 }
 
                 fn send(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
-                    Ok(self.socket.send(buf)?)
+                    let size = self.socket.send(buf)?;
+                    debug!("UnixSocket.recv: sent {:?} bytes from {:?}", size, self.path);
+
+                    Ok(size)
                 }
             }
         }
