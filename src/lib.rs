@@ -11,6 +11,7 @@
 
 /// Traits for implementing modules such as assemblers, sources, or stages.
 pub mod module {
+    #[derive(Debug)]
     pub enum AssemblerError {}
 
     pub trait Assembler {
@@ -20,6 +21,7 @@ pub mod module {
         fn fetch_one(&self) -> Result<(), AssemblerError>;
     }
 
+    #[derive(Debug)]
     pub enum SourceError {}
 
     pub trait Source {
@@ -29,6 +31,7 @@ pub mod module {
         fn fetch_one(&self) -> Result<(), SourceError>;
     }
 
+    #[derive(Debug)]
     pub enum StageError {}
 
     pub trait Stage {
@@ -50,6 +53,7 @@ pub mod module {
 
             use std::os::unix::net::UnixDatagram;
 
+            #[derive(Debug)]
             pub enum TransportError {
                 IOError(std::io::Error),
                 SocketError,
@@ -128,12 +132,19 @@ pub mod module {
         /// Protocols define how to interpret the bytes sent over a `Transport` into the message
         /// objects expected.
         pub mod protocol {
+            #[derive(Debug)]
             pub enum ProtocolError {}
+
             pub trait Protocol {}
+
+            pub struct JSONProtocol { }
+
+            impl Protocol for JSONProtocol { }
 
             pub mod message {
                 use serde::{Deserialize, Serialize};
 
+                #[derive(Debug)]
                 pub enum MessageError {}
 
                 /// All types of objects are contained inside a wrapper object which contains the type and
@@ -173,6 +184,7 @@ pub mod module {
             pub mod encoding {
                 use super::message::*;
 
+                #[derive(Debug)]
                 pub enum EncodingError {
                     ParseError(serde_json::Error),
                 }
@@ -262,6 +274,7 @@ pub mod module {
             }
         }
 
+        #[derive(Debug)]
         pub enum ChannelError {
             TransportError(transport::TransportError),
             ProtocolError(protocol::ProtocolError),
@@ -287,7 +300,7 @@ pub mod module {
         /// The CommandChannel is used to receive commands from the host system.
         pub struct CommandChannel<'a> {
             transport: &'a mut dyn transport::Transport,
-            _protocol: &'a mut dyn protocol::Protocol,
+            protocol: &'a mut dyn protocol::Protocol,
         }
 
         impl Channel for CommandChannel<'_> {
@@ -305,7 +318,7 @@ pub mod module {
         /// The LogChannel is used to send logs back to the host system.
         pub struct LogChannel<'a> {
             transport: &'a mut dyn transport::Transport,
-            _protocol: &'a mut dyn protocol::Protocol,
+            protocol: &'a mut dyn protocol::Protocol,
         }
 
         impl Channel for LogChannel<'_> {
@@ -323,7 +336,7 @@ pub mod module {
         /// The ProgressChannel is used send progress information back to the host system.
         pub struct ProgressChannel<'a> {
             transport: &'a mut dyn transport::Transport,
-            _protocol: &'a mut dyn protocol::Protocol,
+            protocol: &'a mut dyn protocol::Protocol,
         }
 
         impl Channel for ProgressChannel<'_> {
@@ -337,23 +350,29 @@ pub mod module {
                 Ok(())
             }
         }
+
+        #[cfg(test)]
+        mod test {
+            use super::*;
+            use super::protocol::*;
+            use super::transport::*;
+
+            #[test]
+            fn it_works() {
+                let result = 2 + 2;
+                assert_eq!(result, 4);
+            }
+
+            fn create() {
+                let mut channel = CommandChannel {
+                    transport: &mut UnixSocket::new_client().unwrap(),
+                    protocol: &mut JSONProtocol{},
+                };
+                channel.open("/tmp/bar").unwrap();
+            }
+        }
     }
 }
 
 /// Traits for handling osbuild manifest files.
 pub mod manifest {}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
-
-    #[test]
-    fn it_works_better() {
-        let result = 2 + 4;
-        assert_eq!(result, 6);
-    }
-}
