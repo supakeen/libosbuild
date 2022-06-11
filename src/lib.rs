@@ -73,7 +73,7 @@ pub mod module {
 
                 fn send(&self, buf: &mut [u8]) -> Result<usize, TransportError>;
 
-                fn new_client() -> Result<Self, TransportError>
+                fn new() -> Result<Self, TransportError>
                 where
                     Self: Sized;
             }
@@ -84,7 +84,7 @@ pub mod module {
             }
 
             impl Transport for UnixSocket {
-                fn new_client() -> Result<Self, TransportError> {
+                fn new() -> Result<Self, TransportError> {
                     Ok(Self {
                         socket: UnixDatagram::unbound()?,
                         path: None,
@@ -135,11 +135,17 @@ pub mod module {
             #[derive(Debug)]
             pub enum ProtocolError {}
 
-            pub trait Protocol {}
+            pub trait Protocol {
+                fn new() -> Result<Self, ProtocolError> where Self: Sized;
+            }
 
             pub struct JSONProtocol { }
 
-            impl Protocol for JSONProtocol { }
+            impl Protocol for JSONProtocol {
+                fn new() -> Result<Self, ProtocolError> {
+                    Ok(Self{})
+                }
+            }
 
             pub mod message {
                 use serde::{Deserialize, Serialize};
@@ -363,12 +369,14 @@ pub mod module {
                 assert_eq!(result, 4);
             }
 
-            fn create() {
+            #[test]
+            fn unixsocket_non_existent() {
                 let mut channel = CommandChannel {
-                    transport: &mut UnixSocket::new_client().unwrap(),
-                    protocol: &mut JSONProtocol{},
+                    transport: &mut UnixSocket::new().unwrap(),
+                    protocol: &mut JSONProtocol::new().unwrap(),
                 };
-                channel.open("/tmp/bar").unwrap();
+
+                assert!(channel.open("/tmp/non-existent").is_err());
             }
         }
     }
