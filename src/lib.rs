@@ -363,20 +363,45 @@ pub mod module {
             use super::protocol::*;
             use super::transport::*;
 
-            #[test]
-            fn it_works() {
-                let result = 2 + 2;
-                assert_eq!(result, 4);
-            }
+            use std::os::unix::net::UnixDatagram;
+            use std::net::Shutdown;
+            use std::fs::remove_file;
 
             #[test]
-            fn unixsocket_non_existent() {
+            fn unixsocket_non_existent_path() {
                 let mut channel = CommandChannel {
                     transport: &mut UnixSocket::new().unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
                 };
 
                 assert!(channel.open("/tmp/non-existent").is_err());
+            }
+
+            #[test]
+            fn unixsocket_non_existent_directory() {
+                let mut channel = CommandChannel {
+                    transport: &mut UnixSocket::new().unwrap(),
+                    protocol: &mut JSONProtocol::new().unwrap(),
+                };
+
+                assert!(channel.open("/non-existent/non-existent").is_err());
+            }
+
+            #[test]
+            fn unixsocket_existant() {
+                let path = "/tmp/existent-socket";
+
+                let mut socket = UnixDatagram::bind(path).unwrap();
+
+                let mut channel = CommandChannel {
+                    transport: &mut UnixSocket::new().unwrap(),
+                    protocol: &mut JSONProtocol::new().unwrap(),
+                };
+
+                assert!(channel.open(path).is_ok());
+
+                socket.shutdown(Shutdown::Both).unwrap();
+                remove_file(path).unwrap();
             }
         }
     }
