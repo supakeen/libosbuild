@@ -51,7 +51,9 @@ pub mod module {
         pub mod transport {
             use log::*;
 
-            use std::os::unix::net::UnixDatagram;
+            use std::fs::remove_file;
+            use std::net::Shutdown;
+            use std::os::unix::net::{UnixDatagram, UnixStream};
 
             #[derive(Debug)]
             pub enum TransportError {
@@ -67,11 +69,11 @@ pub mod module {
 
             pub trait Transport {
                 fn open(&mut self, path: &str) -> Result<(), TransportError>;
-                fn close(&self) -> Result<(), TransportError>;
+                fn close(&mut self) -> Result<(), TransportError>;
 
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError>;
 
-                fn send(&self, buf: &mut [u8]) -> Result<usize, TransportError>;
+                fn send(&self, buf: &[u8]) -> Result<usize, TransportError>;
 
                 fn new() -> Result<Self, TransportError>
                 where
@@ -79,15 +81,21 @@ pub mod module {
             }
 
             pub struct UnixSocket {
-                path: Option<String>,
                 socket: UnixDatagram,
+
+                path: Option<String>,
+                bind: Option<String>,
             }
 
             impl Transport for UnixSocket {
                 fn new() -> Result<Self, TransportError> {
+                    // XXX Select an arbitrary place to bind our socket to.
+
                     Ok(Self {
                         socket: UnixDatagram::unbound()?,
+
                         path: None,
+                        bind: None,
                     })
                 }
 
@@ -99,8 +107,18 @@ pub mod module {
                     Ok(self.socket.connect(path)?)
                 }
 
-                fn close(&self) -> Result<(), TransportError> {
+                fn close(&mut self) -> Result<(), TransportError> {
                     debug!("UnixSocket.close: {:?}", self.path);
+
+                    self.socket.shutdown(Shutdown::Both)?;
+
+                    // If our socket is bound we want to remove the file.
+                    match &self.bind {
+                        Some(bind) => {
+                            remove_file(bind)?;
+                        }
+                        _ => (),
+                    }
 
                     Ok(())
                 }
@@ -116,7 +134,7 @@ pub mod module {
                     Ok(size)
                 }
 
-                fn send(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
+                fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
                     let size = self.socket.send(buf)?;
 
                     debug!(
@@ -136,14 +154,16 @@ pub mod module {
             pub enum ProtocolError {}
 
             pub trait Protocol {
-                fn new() -> Result<Self, ProtocolError> where Self: Sized;
+                fn new() -> Result<Self, ProtocolError>
+                where
+                    Self: Sized;
             }
 
-            pub struct JSONProtocol { }
+            pub struct JSONProtocol {}
 
             impl Protocol for JSONProtocol {
                 fn new() -> Result<Self, ProtocolError> {
-                    Ok(Self{})
+                    Ok(Self {})
                 }
             }
 
@@ -300,7 +320,7 @@ pub mod module {
 
         pub trait Channel {
             fn open(&mut self, path: &str) -> Result<(), ChannelError>;
-            fn close(&self) -> Result<(), ChannelError>;
+            fn close(&mut self) -> Result<(), ChannelError>;
         }
 
         /// The CommandChannel is used to receive commands from the host system.
@@ -315,7 +335,7 @@ pub mod module {
                 Ok(())
             }
 
-            fn close(&self) -> Result<(), ChannelError> {
+            fn close(&mut self) -> Result<(), ChannelError> {
                 self.transport.close()?;
                 Ok(())
             }
@@ -333,7 +353,7 @@ pub mod module {
                 Ok(())
             }
 
-            fn close(&self) -> Result<(), ChannelError> {
+            fn close(&mut self) -> Result<(), ChannelError> {
                 self.transport.close()?;
                 Ok(())
             }
@@ -351,7 +371,7 @@ pub mod module {
                 Ok(())
             }
 
-            fn close(&self) -> Result<(), ChannelError> {
+            fn close(&mut self) -> Result<(), ChannelError> {
                 self.transport.close()?;
                 Ok(())
             }
@@ -359,13 +379,13 @@ pub mod module {
 
         #[cfg(test)]
         mod test {
-            use super::*;
             use super::protocol::*;
             use super::transport::*;
+            use super::*;
 
-            use std::os::unix::net::UnixDatagram;
-            use std::net::Shutdown;
             use std::fs::remove_file;
+            use std::net::Shutdown;
+            use std::os::unix::net::{UnixDatagram, UnixStream};
 
             #[test]
             fn unixsocket_non_existent_path() {
@@ -385,13 +405,14 @@ pub mod module {
                 };
 
                 assert!(channel.open("/non-existent/non-existent").is_err());
+                assert!(channel.close().is_ok());
             }
 
             #[test]
             fn unixsocket_existant() {
-                let path = "/tmp/existent-socket";
+                let path = "/tmp/socket";
 
-                let mut socket = UnixDatagram::bind(path).unwrap();
+                let sock = UnixDatagram::bind(path);
 
                 let mut channel = CommandChannel {
                     transport: &mut UnixSocket::new().unwrap(),
@@ -399,8 +420,8 @@ pub mod module {
                 };
 
                 assert!(channel.open(path).is_ok());
+                assert!(channel.close().is_ok());
 
-                socket.shutdown(Shutdown::Both).unwrap();
                 remove_file(path).unwrap();
             }
         }
