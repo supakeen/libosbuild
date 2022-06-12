@@ -83,39 +83,41 @@ pub mod module {
             pub struct UnixSocket {
                 socket: UnixDatagram,
 
-                path: Option<String>,
-                bind: Option<String>,
+                src: Option<String>,
+                dst: Option<String>,
             }
 
             impl Transport for UnixSocket {
                 fn new() -> Result<Self, TransportError> {
-                    // XXX Select an arbitrary place to bind our socket to.
-
+                    // TODO: generate a random socket to bind to before we connect
                     Ok(Self {
                         socket: UnixDatagram::unbound()?,
 
-                        path: None,
-                        bind: None,
+                        dst: None,
+                        src: None,
                     })
                 }
 
                 fn open(&mut self, path: &str) -> Result<(), TransportError> {
-                    self.path = Some(path.to_string());
-
                     debug!("UnixSocket.open: {:?}", path);
 
-                    Ok(self.socket.connect(path)?)
+                    self.socket.connect(path)?;
+
+                    self.dst = Some(path.to_string());
+
+                    Ok(())
                 }
 
                 fn close(&mut self) -> Result<(), TransportError> {
-                    debug!("UnixSocket.close: {:?}", self.path);
+                    debug!("UnixSocket.close: {:?}", self.dst);
 
                     self.socket.shutdown(Shutdown::Both)?;
 
                     // If our socket is bound we want to remove the file.
-                    match &self.bind {
-                        Some(bind) => {
-                            remove_file(bind)?;
+                    match &self.src {
+                        Some(src) => {
+                            debug!("UnixSocket.close: removing our bind {:?}", src);
+                            remove_file(src)?;
                         }
                         _ => (),
                     }
@@ -126,10 +128,7 @@ pub mod module {
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
                     let size = self.socket.recv(buf)?;
 
-                    debug!(
-                        "UnixSocket.recv: recv {:?} bytes from {:?}",
-                        size, self.path
-                    );
+                    debug!("UnixSocket.recv: {:?} bytes from {:?}", size, self.dst);
 
                     Ok(size)
                 }
@@ -137,10 +136,7 @@ pub mod module {
                 fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
                     let size = self.socket.send(buf)?;
 
-                    debug!(
-                        "UnixSocket.recv: sent {:?} bytes from {:?}",
-                        size, self.path
-                    );
+                    debug!("UnixSocket.recv: {:?} bytes to {:?}", size, self.dst);
 
                     Ok(size)
                 }
