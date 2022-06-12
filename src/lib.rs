@@ -80,14 +80,16 @@ pub mod module {
                     Self: Sized;
             }
 
-            pub struct UnixSocket {
+            /// A UnixDGRAMSocket Transport to send data back and forth over a SOCK_DGRAM, AF_UNIX
+            /// socket.
+            pub struct UnixDGRAMSocket {
                 socket: UnixDatagram,
 
                 src: Option<String>,
                 dst: Option<String>,
             }
 
-            impl Transport for UnixSocket {
+            impl Transport for UnixDGRAMSocket {
                 fn new() -> Result<Self, TransportError> {
                     // TODO: generate a random socket to bind to before we connect
                     Ok(Self {
@@ -99,7 +101,7 @@ pub mod module {
                 }
 
                 fn open(&mut self, path: &str) -> Result<(), TransportError> {
-                    debug!("UnixSocket.open: {:?}", path);
+                    debug!("UnixDGRAMSocket.open: {:?}", path);
 
                     self.socket.connect(path)?;
 
@@ -109,14 +111,14 @@ pub mod module {
                 }
 
                 fn close(&mut self) -> Result<(), TransportError> {
-                    debug!("UnixSocket.close: {:?}", self.dst);
+                    debug!("UnixDGRAMSocket.close: {:?}", self.dst);
 
                     self.socket.shutdown(Shutdown::Both)?;
 
                     // If our socket is bound we want to remove the file.
                     match &self.src {
                         Some(src) => {
-                            debug!("UnixSocket.close: removing our bind {:?}", src);
+                            debug!("UnixDGRAMSocket.close: removing our src {:?}", src);
                             remove_file(src)?;
                         }
                         _ => (),
@@ -128,7 +130,7 @@ pub mod module {
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
                     let size = self.socket.recv(buf)?;
 
-                    debug!("UnixSocket.recv: {:?} bytes from {:?}", size, self.dst);
+                    debug!("UnixDGRAMSocket.recv: {:?} bytes from {:?}", size, self.dst);
 
                     Ok(size)
                 }
@@ -136,7 +138,7 @@ pub mod module {
                 fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
                     let size = self.socket.send(buf)?;
 
-                    debug!("UnixSocket.recv: {:?} bytes to {:?}", size, self.dst);
+                    debug!("UnixDGRAMSocket.recv: {:?} bytes to {:?}", size, self.dst);
 
                     Ok(size)
                 }
@@ -386,7 +388,7 @@ pub mod module {
             #[test]
             fn unixsocket_non_existent_path() {
                 let mut channel = CommandChannel {
-                    transport: &mut UnixSocket::new().unwrap(),
+                    transport: &mut UnixDGRAMSocket::new().unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
                 };
 
@@ -396,7 +398,7 @@ pub mod module {
             #[test]
             fn unixsocket_non_existent_directory() {
                 let mut channel = CommandChannel {
-                    transport: &mut UnixSocket::new().unwrap(),
+                    transport: &mut UnixDGRAMSocket::new().unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
                 };
 
@@ -411,7 +413,7 @@ pub mod module {
                 let sock = UnixDatagram::bind(path);
 
                 let mut channel = CommandChannel {
-                    transport: &mut UnixSocket::new().unwrap(),
+                    transport: &mut UnixDGRAMSocket::new().unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
                 };
 
