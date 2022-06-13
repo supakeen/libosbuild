@@ -394,9 +394,9 @@ pub mod module {
             }
 
             #[test]
-            fn unixsocket_existant() {
+            fn unixsocket_exists() {
+                // XXX can we use autobound sockets here as well?
                 let path = "/tmp/socket";
-
                 let sock = UnixDatagram::bind(path);
 
                 let mut channel = CommandChannel {
