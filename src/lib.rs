@@ -14,8 +14,7 @@ pub mod module {
     #[derive(Debug)]
     pub enum AssemblerError {}
 
-    pub trait Assembler {
-    }
+    pub trait Assembler {}
 
     #[derive(Debug)]
     pub enum SourceError {}
@@ -30,8 +29,7 @@ pub mod module {
     #[derive(Debug)]
     pub enum StageError {}
 
-    pub trait Stage {
-    }
+    pub trait Stage {}
 
     /// Modules are executed in a sandbox and talk to the main osbuild process on the host
     /// machine through a transport (AF_UNIX socket). The `channel` module provides the necessary
@@ -60,7 +58,9 @@ pub mod module {
             }
 
             pub trait Transport {
-                fn open(&mut self, path: &str) -> Result<(), TransportError>;
+                fn new(dst: String, src: Option<String>) -> Result<Self, TransportError>
+                where
+                    Self: Sized;
 
                 fn close(&mut self) -> Result<(), TransportError>;
 
@@ -72,35 +72,20 @@ pub mod module {
             /// socket.
             pub struct UnixDGRAMSocket {
                 socket: UnixDatagram,
-                src: Option<String>,
-                dst: Option<String>,
-            }
-
-            impl UnixDGRAMSocket {
-                pub fn new(src: Option<String>) -> Result<Self, TransportError> {
-                    Ok(Self {
-                        socket: UnixDatagram::bind("")?,
-
-                        dst: None,
-                        src: Some(src.unwrap_or("".to_string())),
-                    })
-                }
             }
 
             impl Transport for UnixDGRAMSocket {
-                fn open(&mut self, dst: &str) -> Result<(), TransportError> {
-                    debug!("UnixDGRAMSocket.open: {:?}", dst);
+                fn new(dst: String, src: Option<String>) -> Result<Self, TransportError> {
+                    let socket = UnixDatagram::bind("")?;
 
-                    self.socket.connect(dst)?;
+                    let instance = Self { socket: socket };
 
-                    self.dst = Some(dst.to_string());
+                    instance.socket.connect(dst)?;
 
-                    Ok(())
+                    Ok(instance)
                 }
 
                 fn close(&mut self) -> Result<(), TransportError> {
-                    debug!("UnixDGRAMSocket.close: {:?}", self.dst);
-
                     self.socket.shutdown(Shutdown::Both)?;
 
                     Ok(())
@@ -109,17 +94,102 @@ pub mod module {
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
                     let size = self.socket.recv(buf)?;
 
-                    debug!("UnixDGRAMSocket.recv: {:?} bytes from {:?}", size, self.dst);
-
                     Ok(size)
                 }
 
                 fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
                     let size = self.socket.send(buf)?;
 
-                    debug!("UnixDGRAMSocket.recv: {:?} bytes to {:?}", size, self.dst);
-
                     Ok(size)
+                }
+            }
+
+            /// A UnixSTREAMSocket Transport to send data back and forth over a SOCK_STREAM, AF_UNIX
+            /// socket.
+            pub struct UnixSTREAMSocket {
+                socket: UnixStream,
+            }
+
+            impl Transport for UnixSTREAMSocket {
+                fn new(dst: String, src: Option<String>) -> Result<Self, TransportError> {
+                    Ok(Self {
+                        socket: UnixStream::connect(dst)?,
+                    })
+                }
+
+                fn close(&mut self) -> Result<(), TransportError> {
+                    Ok(())
+                }
+
+                fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
+                    Ok(1)
+                }
+
+                fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
+                    Ok(1)
+                }
+            }
+
+            #[cfg(test)]
+            mod test {
+                use super::*;
+
+                use std::fs::remove_file;
+                use std::os::unix::net::UnixDatagram;
+
+                #[test]
+                fn unixdgramsocket_non_existent_path() {
+                    assert!(UnixDGRAMSocket::new("/tmp/non-existent".to_string(), None).is_err());
+                }
+
+                #[test]
+                fn unixdgramsocket_non_existent_directory() {
+                    assert!(
+                        UnixDGRAMSocket::new("/non-existent/non-existent".to_string(), None)
+                            .is_err()
+                    );
+                }
+
+                #[test]
+                fn unixdgramsocket_exists() {
+                    // XXX can we use autobound sockets here as well?
+                    let path = "/tmp/socket";
+
+                    let _sock = UnixDatagram::bind(path).unwrap();
+
+                    assert!(UnixDGRAMSocket::new(path.to_string(), None).is_ok());
+
+                    remove_file(path).unwrap();
+                }
+
+                #[test]
+                fn unixdgramsocket_send() {
+                    // XXX can we use autobound sockets here as well?
+                    let path = "/tmp/socket-send";
+                    let sock = UnixDatagram::bind(path).unwrap();
+
+                    let transport = UnixDGRAMSocket::new(path.to_string(), None).unwrap();
+                    transport.send(b"foo").unwrap();
+
+                    let mut buffer = vec![0; 3];
+                    sock.recv_from(buffer.as_mut_slice()).unwrap();
+
+                    assert_eq!(buffer, b"foo");
+
+                    remove_file(path).unwrap();
+                }
+
+                #[test]
+                fn unixstreamsocket_non_existent_path() {
+                    assert!(UnixSTREAMSocket::new("/tmp/non-existent".to_string(), None).is_err());
+                }
+
+                #[test]
+                fn unixstreamsocket_non_existent_directory() {
+                    assert!(
+                        UnixSTREAMSocket::new("/non-existent/non-existent".to_string(), None)
+                            .is_err()
+                    );
                 }
             }
         }
@@ -308,7 +378,6 @@ pub mod module {
 
         impl Channel for CommandChannel<'_> {
             fn open(&mut self, path: &str) -> Result<(), ChannelError> {
-                self.transport.open(path)?;
                 Ok(())
             }
 
@@ -326,7 +395,6 @@ pub mod module {
 
         impl Channel for LogChannel<'_> {
             fn open(&mut self, path: &str) -> Result<(), ChannelError> {
-                self.transport.open(path)?;
                 Ok(())
             }
 
@@ -344,7 +412,6 @@ pub mod module {
 
         impl Channel for ProgressChannel<'_> {
             fn open(&mut self, path: &str) -> Result<(), ChannelError> {
-                self.transport.open(path)?;
                 Ok(())
             }
 
@@ -352,106 +419,6 @@ pub mod module {
                 self.transport.close()?;
                 Ok(())
             }
-        }
-
-        #[cfg(test)]
-        mod test {
-            use super::protocol::*;
-            use super::transport::*;
-            use super::*;
-
-            use std::fs::remove_file;
-            use std::net::Shutdown;
-            use std::os::unix::net::{UnixDatagram, UnixStream};
-
-            #[test]
-            fn unixdgramsocket_non_existent_path() {
-                let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
-                    protocol: &mut JSONProtocol::new().unwrap(),
-                };
-
-                assert!(channel.open("/tmp/non-existent").is_err());
-            }
-
-            #[test]
-            fn unixdgramsocket_non_existent_directory() {
-                let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
-                    protocol: &mut JSONProtocol::new().unwrap(),
-                };
-
-                assert!(channel.open("/non-existent/non-existent").is_err());
-                assert!(channel.close().is_ok());
-            }
-
-            #[test]
-            fn unixdgramsocket_exists() {
-                // XXX can we use autobound sockets here as well?
-                let path = "/tmp/socket";
-                let sock = UnixDatagram::bind(path).unwrap();
-
-                let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
-                    protocol: &mut JSONProtocol::new().unwrap(),
-                };
-
-                assert!(channel.open(path).is_ok());
-                assert!(channel.close().is_ok());
-
-                remove_file(path).unwrap();
-            }
-
-            #[test]
-            fn unixdgramsocket_send() {
-                // XXX can we use autobound sockets here as well?
-                let path = "/tmp/socket-send";
-                let sock = UnixDatagram::bind(path).unwrap();
-
-                let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
-                    protocol: &mut JSONProtocol::new().unwrap(),
-                };
-
-                assert!(channel.open(path).is_ok());
-
-                channel.transport.send(b"foo").unwrap();
-
-                let mut buffer = vec![0; 3];
-                sock.recv_from(buffer.as_mut_slice()).unwrap();
-
-                assert_eq!(buffer, b"foo");
-
-                assert!(channel.close().is_ok());
-
-                remove_file(path).unwrap();
-            }
-
-            #[test]
-            fn unixdgramsocket_recv() {
-                // XXX can we use autobound sockets here as well?
-                let path = "/tmp/socket-recv";
-                let sock = UnixDatagram::bind(path).unwrap();
-
-                let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
-                    protocol: &mut JSONProtocol::new().unwrap(),
-                };
-
-                assert!(channel.open(path).is_ok());
-
-                channel.transport.send(b"foo").unwrap();
-
-                let mut buffer = vec![0; 3];
-                sock.recv_from(buffer.as_mut_slice()).unwrap();
-
-                assert_eq!(buffer, b"foo");
-
-                assert!(channel.close().is_ok());
-
-                remove_file(path).unwrap();
-            }
-
         }
     }
 }
