@@ -96,7 +96,6 @@ pub mod module {
             }
 
             impl Transport for UnixDGRAMSocket {
-
                 fn open(&mut self, dst: &str) -> Result<(), TransportError> {
                     debug!("UnixDGRAMSocket.open: {:?}", dst);
 
@@ -374,7 +373,7 @@ pub mod module {
             use std::os::unix::net::{UnixDatagram, UnixStream};
 
             #[test]
-            fn unixsocket_non_existent_path() {
+            fn unixdgramsocket_non_existent_path() {
                 let mut channel = CommandChannel {
                     transport: &mut UnixDGRAMSocket::new(None).unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
@@ -384,7 +383,7 @@ pub mod module {
             }
 
             #[test]
-            fn unixsocket_non_existent_directory() {
+            fn unixdgramsocket_non_existent_directory() {
                 let mut channel = CommandChannel {
                     transport: &mut UnixDGRAMSocket::new(None).unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
@@ -395,10 +394,10 @@ pub mod module {
             }
 
             #[test]
-            fn unixsocket_exists() {
+            fn unixdgramsocket_exists() {
                 // XXX can we use autobound sockets here as well?
                 let path = "/tmp/socket";
-                let sock = UnixDatagram::bind(path);
+                let sock = UnixDatagram::bind(path).unwrap();
 
                 let mut channel = CommandChannel {
                     transport: &mut UnixDGRAMSocket::new(None).unwrap(),
@@ -410,6 +409,32 @@ pub mod module {
 
                 remove_file(path).unwrap();
             }
+
+            #[test]
+            fn unixdgramsocket_send_and_recv() {
+                // XXX can we use autobound sockets here as well?
+                let path = "/tmp/socket-sr";
+                let sock = UnixDatagram::bind(path).unwrap();
+
+                let mut channel = CommandChannel {
+                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
+                    protocol: &mut JSONProtocol::new().unwrap(),
+                };
+
+                assert!(channel.open(path).is_ok());
+
+                channel.transport.send(b"foo").unwrap();
+
+                let mut buffer = vec![0; 3];
+                sock.recv_from(buffer.as_mut_slice()).unwrap();
+
+                assert_eq!(buffer, b"foo");
+
+                assert!(channel.close().is_ok());
+
+                remove_file(path).unwrap();
+            }
+
         }
     }
 }
