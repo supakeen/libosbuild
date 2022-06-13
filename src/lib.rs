@@ -252,96 +252,112 @@ pub mod module {
                         }
                     }
                 }
-            }
 
-            pub mod encoding {
-                use super::message::*;
+                pub mod encoding {
+                    use super::*;
 
-                #[derive(Debug)]
-                pub enum EncodingError {
-                    ParseError(serde_json::Error),
-                }
-
-                impl From<serde_json::Error> for EncodingError {
-                    fn from(err: serde_json::Error) -> Self {
-                        Self::ParseError(err)
-                    }
-                }
-
-                pub trait Encoding {
-                    fn encode_message(&self, message: Message) -> Result<Vec<u8>, EncodingError>;
-                    fn decode_message(&self, message: &str) -> Result<Message, EncodingError>;
-
-                    fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError>;
-                    fn decode_method(&self, method: &str) -> Result<Method, EncodingError>;
-
-                    fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError>;
-                    fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError>;
-
-                    fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError>;
-                    fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError>;
-
-                    fn encode_exception(
-                        &self,
-                        exception: Exception,
-                    ) -> Result<Vec<u8>, EncodingError>;
-                    fn decode_exception(&self, exception: &str)
-                        -> Result<Exception, EncodingError>;
-                }
-
-                pub struct JSONEncoding {}
-
-                impl Encoding for JSONEncoding {
-                    fn encode_message(&self, message: Message) -> Result<Vec<u8>, EncodingError> {
-                        Ok(serde_json::to_string(&message)?
-                            .as_str()
-                            .as_bytes()
-                            .to_vec())
+                    #[derive(Debug)]
+                    pub enum EncodingError {
+                        ParseError(serde_json::Error),
                     }
 
-                    fn decode_message(&self, message: &str) -> Result<Message, EncodingError> {
-                        Ok(Message {})
+                    impl From<serde_json::Error> for EncodingError {
+                        fn from(err: serde_json::Error) -> Self {
+                            Self::ParseError(err)
+                        }
                     }
 
-                    fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError> {
-                        Ok(serde_json::to_string(&method)?.as_str().as_bytes().to_vec())
+                    pub trait Encoding {
+                        fn encode_message(
+                            &self,
+                            message: Message,
+                        ) -> Result<Vec<u8>, EncodingError>;
+                        fn decode_message(&self, message: &str) -> Result<Message, EncodingError>;
+
+                        fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError>;
+                        fn decode_method(&self, method: &str) -> Result<Method, EncodingError>;
+
+                        fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError>;
+                        fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError>;
+
+                        fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError>;
+                        fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError>;
+
+                        fn encode_exception(
+                            &self,
+                            exception: Exception,
+                        ) -> Result<Vec<u8>, EncodingError>;
+                        fn decode_exception(
+                            &self,
+                            exception: &str,
+                        ) -> Result<Exception, EncodingError>;
                     }
 
-                    fn decode_method(&self, method: &str) -> Result<Method, EncodingError> {
-                        Ok(Method {})
+                    pub struct JSONEncoding {}
+
+                    impl Encoding for JSONEncoding {
+                        fn encode_message(
+                            &self,
+                            message: Message,
+                        ) -> Result<Vec<u8>, EncodingError> {
+                            Ok(serde_json::to_string(&message)?
+                                .as_str()
+                                .as_bytes()
+                                .to_vec())
+                        }
+
+                        fn decode_message(&self, message: &str) -> Result<Message, EncodingError> {
+                            Ok(Message {})
+                        }
+
+                        fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError> {
+                            Ok(serde_json::to_string(&method)?.as_str().as_bytes().to_vec())
+                        }
+
+                        fn decode_method(&self, method: &str) -> Result<Method, EncodingError> {
+                            Ok(Method {})
+                        }
+
+                        fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError> {
+                            Ok(serde_json::to_string(&reply)?.as_str().as_bytes().to_vec())
+                        }
+
+                        fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError> {
+                            Ok(Reply {})
+                        }
+
+                        fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError> {
+                            Ok(serde_json::to_string(&signal)?.as_str().as_bytes().to_vec())
+                        }
+
+                        fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError> {
+                            Ok(Signal {})
+                        }
+
+                        fn encode_exception(
+                            &self,
+                            exception: Exception,
+                        ) -> Result<Vec<u8>, EncodingError> {
+                            Ok(serde_json::to_string(&exception)?
+                                .as_str()
+                                .as_bytes()
+                                .to_vec())
+                        }
+
+                        fn decode_exception(
+                            &self,
+                            exception: &str,
+                        ) -> Result<Exception, EncodingError> {
+                            Ok(Exception {})
+                        }
                     }
 
-                    fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError> {
-                        Ok(serde_json::to_string(&reply)?.as_str().as_bytes().to_vec())
-                    }
-
-                    fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError> {
-                        Ok(Reply {})
-                    }
-
-                    fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError> {
-                        Ok(serde_json::to_string(&signal)?.as_str().as_bytes().to_vec())
-                    }
-
-                    fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError> {
-                        Ok(Signal {})
-                    }
-
-                    fn encode_exception(
-                        &self,
-                        exception: Exception,
-                    ) -> Result<Vec<u8>, EncodingError> {
-                        Ok(serde_json::to_string(&exception)?
-                            .as_str()
-                            .as_bytes()
-                            .to_vec())
-                    }
-
-                    fn decode_exception(
-                        &self,
-                        exception: &str,
-                    ) -> Result<Exception, EncodingError> {
-                        Ok(Exception {})
+                    #[cfg(test)]
+                    mod test {
+                        #[test]
+                        fn test_me() {
+                            assert_eq!(1, 1);
+                        }
                     }
                 }
             }
