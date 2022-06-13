@@ -9,7 +9,7 @@
 // You can find out more on [osbuild's homepage](https://osbuild.org/) or
 // [osbuild's GitHub](https://github.com/osbuild/osbuild).
 
-/// Traits for implementing modules such as assemblers, sources, or stages.
+/// Traits for implementing osbuild modules such as assemblers, sources, or stages.
 pub mod module {
     #[derive(Debug)]
     pub enum AssemblerError {}
@@ -213,7 +213,6 @@ pub mod module {
                     Ok(Self {})
                 }
             }
-
 
             /// Message types that exist in the protocols. Some of these messages can only be sent
             /// over certain types of transports).
@@ -430,6 +429,8 @@ pub mod module {
             }
         }
 
+        use transport::Transport;
+
         #[derive(Debug)]
         pub enum ChannelError {
             TransportError(transport::TransportError),
@@ -449,17 +450,32 @@ pub mod module {
         }
 
         pub trait Channel {
+            /// Open a channel with new_default settings as proposed by the `lib_osbuild` version.
+            fn new_default() -> Result<Self, ChannelError>
+            where
+                Self: Sized;
+
             fn open(&mut self, dst: &str) -> Result<(), ChannelError>;
             fn close(&mut self) -> Result<(), ChannelError>;
         }
 
         /// Used to receive commands from the host system.
-        pub struct CommandChannel<'a> {
-            transport: &'a mut dyn transport::Transport,
-            protocol: &'a mut dyn protocol::Protocol,
+        pub struct CommandChannel {
+            transport: Box<dyn transport::Transport>,
+            protocol: Box<dyn protocol::Protocol>,
         }
 
-        impl Channel for CommandChannel<'_> {
+        impl Channel for CommandChannel {
+            fn new_default() -> Result<Self, ChannelError> {
+                Ok(Self {
+                    transport: Box::new(transport::UnixDGRAMSocket::new(
+                        "/run/osbuild/api/log".to_string(),
+                        None,
+                    )?),
+                    protocol: Box::new(protocol::JSONProtocol {}),
+                })
+            }
+
             fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
                 Ok(())
             }
@@ -471,12 +487,22 @@ pub mod module {
         }
 
         /// Used to send logs back to the host system.
-        pub struct LogChannel<'a> {
-            transport: &'a mut dyn transport::Transport,
-            protocol: &'a mut dyn protocol::Protocol,
+        pub struct LogChannel {
+            transport: Box<dyn transport::Transport>,
+            protocol: Box<dyn protocol::Protocol>,
         }
 
-        impl Channel for LogChannel<'_> {
+        impl Channel for LogChannel {
+            fn new_default() -> Result<Self, ChannelError> {
+                Ok(Self {
+                    transport: Box::new(transport::UnixDGRAMSocket::new(
+                        "/run/osbuild/api/log".to_string(),
+                        None,
+                    )?),
+                    protocol: Box::new(protocol::JSONProtocol {}),
+                })
+            }
+
             fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
                 Ok(())
             }
@@ -488,12 +514,22 @@ pub mod module {
         }
 
         /// Used send progress information back to the host system.
-        pub struct ProgressChannel<'a> {
-            transport: &'a mut dyn transport::Transport,
-            protocol: &'a mut dyn protocol::Protocol,
+        pub struct ProgressChannel {
+            transport: Box<dyn transport::Transport>,
+            protocol: Box<dyn protocol::Protocol>,
         }
 
-        impl Channel for ProgressChannel<'_> {
+        impl Channel for ProgressChannel {
+            fn new_default() -> Result<Self, ChannelError> {
+                Ok(Self {
+                    transport: Box::new(transport::UnixDGRAMSocket::new(
+                        "/run/osbuild/api/progress".to_string(),
+                        None,
+                    )?),
+                    protocol: Box::new(protocol::JSONProtocol {}),
+                })
+            }
+
             fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
                 Ok(())
             }
