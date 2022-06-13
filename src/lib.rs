@@ -222,26 +222,26 @@ pub mod module {
 
                 /// All types of objects are contained inside a wrapper object which contains the type and
                 /// the data used.
-                #[derive(Serialize, Deserialize, Debug)]
+                #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Envelope {
                     r#type: String,
                     data: String,
                 }
 
                 /// The various types of objects that can be encoded and passed over the wire.
-                #[derive(Serialize, Deserialize, Debug)]
+                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
                 pub struct Message {}
 
-                #[derive(Serialize, Deserialize, Debug)]
+                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
                 pub struct Method {}
 
-                #[derive(Serialize, Deserialize, Debug)]
+                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
                 pub struct Reply {}
 
-                #[derive(Serialize, Deserialize, Debug)]
+                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
                 pub struct Signal {}
 
-                #[derive(Serialize, Deserialize, Debug)]
+                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
                 pub struct Exception {}
 
                 impl Envelope {
@@ -354,9 +354,78 @@ pub mod module {
 
                     #[cfg(test)]
                     mod test {
+                        use std::str;
+
+                        use super::*;
+
                         #[test]
-                        fn test_me() {
-                            assert_eq!(1, 1);
+                        fn test_encode_message() {
+                            let encoding = JSONEncoding {};
+                            let message = Message {};
+
+                            assert!(encoding.encode_message(message).is_ok());
+
+                            let data = encoding.encode_message(message).unwrap();
+
+                            assert!(encoding
+                                .decode_message(str::from_utf8(&data).unwrap())
+                                .is_ok());
+                        }
+
+                        #[test]
+                        fn test_encode_reply() {
+                            let encoding = JSONEncoding {};
+                            let reply = Reply {};
+
+                            assert!(encoding.encode_reply(reply).is_ok());
+
+                            let data = encoding.encode_reply(reply).unwrap();
+
+                            assert!(encoding
+                                .decode_reply(str::from_utf8(&data).unwrap())
+                                .is_ok());
+                        }
+
+                        #[test]
+                        fn test_encode_method() {
+                            let encoding = JSONEncoding {};
+                            let method = Method {};
+
+                            assert!(encoding.encode_method(method).is_ok());
+
+                            let data = encoding.encode_method(method).unwrap();
+
+                            assert!(encoding
+                                .decode_method(str::from_utf8(&data).unwrap())
+                                .is_ok());
+                        }
+
+                        #[test]
+                        fn test_encode_signal() {
+                            let encoding = JSONEncoding {};
+                            let signal = Signal {};
+
+                            assert!(encoding.encode_signal(signal).is_ok());
+
+                            let data = encoding.encode_signal(signal).unwrap();
+
+                            assert!(encoding
+                                .decode_signal(str::from_utf8(&data).unwrap())
+                                .is_ok());
+                        }
+
+                        #[test]
+                        fn test_encode_exception() {
+                            let encoding = JSONEncoding {};
+                            let exception = Exception {};
+
+                            assert!(encoding.encode_exception(exception).is_ok());
+
+                            let data = encoding.encode_exception(exception).unwrap();
+
+                            assert!(encoding
+                                .decode_exception(str::from_utf8(&data).unwrap())
+                                .is_ok());
                         }
                     }
                 }
