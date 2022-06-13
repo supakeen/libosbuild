@@ -69,45 +69,46 @@ pub mod module {
 
             pub trait Transport {
                 fn open(&mut self, path: &str) -> Result<(), TransportError>;
+
                 fn close(&mut self) -> Result<(), TransportError>;
 
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError>;
-
                 fn send(&self, buf: &[u8]) -> Result<usize, TransportError>;
-
-                fn new() -> Result<Self, TransportError>
-                where
-                    Self: Sized;
             }
 
             /// A UnixDGRAMSocket Transport to send data back and forth over a SOCK_DGRAM, AF_UNIX
             /// socket.
             pub struct UnixDGRAMSocket {
                 socket: UnixDatagram,
-                path: Option<String>,
+                src: Option<String>,
+                dst: Option<String>,
             }
 
-            impl Transport for UnixDGRAMSocket {
-                fn new() -> Result<Self, TransportError> {
+            impl UnixDGRAMSocket {
+                pub fn new(src: Option<String>) -> Result<Self, TransportError> {
                     Ok(Self {
                         socket: UnixDatagram::bind("")?,
 
-                        path: None,
+                        dst: None,
+                        src: Some(src.unwrap_or("".to_string())),
                     })
                 }
+            }
 
-                fn open(&mut self, path: &str) -> Result<(), TransportError> {
-                    debug!("UnixDGRAMSocket.open: {:?}", path);
+            impl Transport for UnixDGRAMSocket {
 
-                    self.socket.connect(path)?;
+                fn open(&mut self, dst: &str) -> Result<(), TransportError> {
+                    debug!("UnixDGRAMSocket.open: {:?}", dst);
 
-                    self.path = Some(path.to_string());
+                    self.socket.connect(dst)?;
+
+                    self.dst = Some(dst.to_string());
 
                     Ok(())
                 }
 
                 fn close(&mut self) -> Result<(), TransportError> {
-                    debug!("UnixDGRAMSocket.close: {:?}", self.path);
+                    debug!("UnixDGRAMSocket.close: {:?}", self.dst);
 
                     self.socket.shutdown(Shutdown::Both)?;
 
@@ -117,7 +118,7 @@ pub mod module {
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
                     let size = self.socket.recv(buf)?;
 
-                    debug!("UnixDGRAMSocket.recv: {:?} bytes from {:?}", size, self.path);
+                    debug!("UnixDGRAMSocket.recv: {:?} bytes from {:?}", size, self.dst);
 
                     Ok(size)
                 }
@@ -125,7 +126,7 @@ pub mod module {
                 fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
                     let size = self.socket.send(buf)?;
 
-                    debug!("UnixDGRAMSocket.recv: {:?} bytes to {:?}", size, self.path);
+                    debug!("UnixDGRAMSocket.recv: {:?} bytes to {:?}", size, self.dst);
 
                     Ok(size)
                 }
@@ -304,7 +305,7 @@ pub mod module {
         }
 
         pub trait Channel {
-            fn open(&mut self, path: &str) -> Result<(), ChannelError>;
+            fn open(&mut self, dst: &str) -> Result<(), ChannelError>;
             fn close(&mut self) -> Result<(), ChannelError>;
         }
 
@@ -375,7 +376,7 @@ pub mod module {
             #[test]
             fn unixsocket_non_existent_path() {
                 let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new().unwrap(),
+                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
                 };
 
@@ -385,7 +386,7 @@ pub mod module {
             #[test]
             fn unixsocket_non_existent_directory() {
                 let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new().unwrap(),
+                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
                 };
 
@@ -400,7 +401,7 @@ pub mod module {
                 let sock = UnixDatagram::bind(path);
 
                 let mut channel = CommandChannel {
-                    transport: &mut UnixDGRAMSocket::new().unwrap(),
+                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
                     protocol: &mut JSONProtocol::new().unwrap(),
                 };
 
