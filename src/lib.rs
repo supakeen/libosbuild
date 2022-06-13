@@ -39,9 +39,6 @@ pub mod module {
         /// usually an AF_UNIX socket set to SOCK_DGRAM but premature abstraction has led to
         /// this being swappable if ever necessary (say: AF_INET + SOCK_STREAM).
         pub mod transport {
-            use log::*;
-
-            use std::fs::remove_file;
             use std::net::Shutdown;
             use std::os::unix::net::{UnixDatagram, UnixStream};
 
@@ -76,7 +73,7 @@ pub mod module {
 
             impl Transport for UnixDGRAMSocket {
                 fn new(dst: String, src: Option<String>) -> Result<Self, TransportError> {
-                    let socket = UnixDatagram::bind("")?;
+                    let socket = UnixDatagram::bind(src.unwrap_or("".to_string()))?;
 
                     let instance = Self { socket: socket };
 
@@ -111,21 +108,23 @@ pub mod module {
             }
 
             impl Transport for UnixSTREAMSocket {
-                fn new(dst: String, src: Option<String>) -> Result<Self, TransportError> {
+                fn new(dst: String, _src: Option<String>) -> Result<Self, TransportError> {
                     Ok(Self {
                         socket: UnixStream::connect(dst)?,
                     })
                 }
 
                 fn close(&mut self) -> Result<(), TransportError> {
+                    self.socket.shutdown(Shutdown::Both)?;
+
                     Ok(())
                 }
 
-                fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
+                fn recv(&self, _buf: &mut [u8]) -> Result<usize, TransportError> {
                     Ok(1)
                 }
 
-                fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
+                fn send(&self, _buf: &[u8]) -> Result<usize, TransportError> {
                     Ok(1)
                 }
             }
@@ -244,15 +243,6 @@ pub mod module {
                 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
                 pub struct Exception {}
 
-                impl Envelope {
-                    fn new() -> Self {
-                        Self {
-                            r#type: "bar".to_string(),
-                            data: "foo".to_string(),
-                        }
-                    }
-                }
-
                 pub mod encoding {
                     use super::*;
 
@@ -307,7 +297,8 @@ pub mod module {
                         }
 
                         fn decode_message(&self, message: &str) -> Result<Message, EncodingError> {
-                            Ok(Message {})
+                            let value: Message = serde_json::from_str(message)?;
+                            Ok(value)
                         }
 
                         fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError> {
@@ -315,7 +306,8 @@ pub mod module {
                         }
 
                         fn decode_method(&self, method: &str) -> Result<Method, EncodingError> {
-                            Ok(Method {})
+                            let value: Method = serde_json::from_str(method)?;
+                            Ok(value)
                         }
 
                         fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError> {
@@ -323,7 +315,8 @@ pub mod module {
                         }
 
                         fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError> {
-                            Ok(Reply {})
+                            let value: Reply = serde_json::from_str(reply)?;
+                            Ok(value)
                         }
 
                         fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError> {
@@ -331,7 +324,8 @@ pub mod module {
                         }
 
                         fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError> {
-                            Ok(Signal {})
+                            let value: Signal = serde_json::from_str(signal)?;
+                            Ok(value)
                         }
 
                         fn encode_exception(
@@ -348,7 +342,8 @@ pub mod module {
                             &self,
                             exception: &str,
                         ) -> Result<Exception, EncodingError> {
-                            Ok(Exception {})
+                            let value: Exception = serde_json::from_str(exception)?;
+                            Ok(value)
                         }
                     }
 
@@ -462,7 +457,7 @@ pub mod module {
         }
 
         impl Channel for CommandChannel<'_> {
-            fn open(&mut self, path: &str) -> Result<(), ChannelError> {
+            fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
                 Ok(())
             }
 
@@ -479,7 +474,7 @@ pub mod module {
         }
 
         impl Channel for LogChannel<'_> {
-            fn open(&mut self, path: &str) -> Result<(), ChannelError> {
+            fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
                 Ok(())
             }
 
@@ -496,7 +491,7 @@ pub mod module {
         }
 
         impl Channel for ProgressChannel<'_> {
-            fn open(&mut self, path: &str) -> Result<(), ChannelError> {
+            fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
                 Ok(())
             }
 
