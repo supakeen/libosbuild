@@ -15,10 +15,6 @@ pub mod module {
     pub enum AssemblerError {}
 
     pub trait Assembler {
-        fn cached(&self) -> Result<bool, AssemblerError>;
-
-        fn fetch_all(&self) -> Result<(), AssemblerError>;
-        fn fetch_one(&self) -> Result<(), AssemblerError>;
     }
 
     #[derive(Debug)]
@@ -35,10 +31,6 @@ pub mod module {
     pub enum StageError {}
 
     pub trait Stage {
-        fn cached(&self) -> Result<bool, StageError>;
-
-        fn fetch_all(&self) -> Result<(), StageError>;
-        fn fetch_one(&self) -> Result<(), StageError>;
     }
 
     /// Modules are executed in a sandbox and talk to the main osbuild process on the host
@@ -411,9 +403,34 @@ pub mod module {
             }
 
             #[test]
-            fn unixdgramsocket_send_and_recv() {
+            fn unixdgramsocket_send() {
                 // XXX can we use autobound sockets here as well?
-                let path = "/tmp/socket-sr";
+                let path = "/tmp/socket-send";
+                let sock = UnixDatagram::bind(path).unwrap();
+
+                let mut channel = CommandChannel {
+                    transport: &mut UnixDGRAMSocket::new(None).unwrap(),
+                    protocol: &mut JSONProtocol::new().unwrap(),
+                };
+
+                assert!(channel.open(path).is_ok());
+
+                channel.transport.send(b"foo").unwrap();
+
+                let mut buffer = vec![0; 3];
+                sock.recv_from(buffer.as_mut_slice()).unwrap();
+
+                assert_eq!(buffer, b"foo");
+
+                assert!(channel.close().is_ok());
+
+                remove_file(path).unwrap();
+            }
+
+            #[test]
+            fn unixdgramsocket_recv() {
+                // XXX can we use autobound sockets here as well?
+                let path = "/tmp/socket-recv";
                 let sock = UnixDatagram::bind(path).unwrap();
 
                 let mut channel = CommandChannel {
