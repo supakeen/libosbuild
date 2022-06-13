@@ -32,8 +32,8 @@ pub mod module {
     pub trait Stage {}
 
     /// Modules are executed in a sandbox and talk to the main osbuild process on the host
-    /// machine through a transport (AF_UNIX socket). The `channel` module provides the necessary
-    /// functionality for your osbuild module to do so.
+    /// machine through a transport. The `channel` module provides abstractions for an `osbuild`
+    /// module to talk to the host system.
     pub mod channel {
         /// Transports define the underlying method used to send and receive raw bytes. This is
         /// usually an AF_UNIX socket set to SOCK_DGRAM but premature abstraction has led to
@@ -205,6 +205,7 @@ pub mod module {
                     Self: Sized;
             }
 
+            /// Encodes messages as JSON.
             pub struct JSONProtocol {}
 
             impl Protocol for JSONProtocol {
@@ -213,6 +214,9 @@ pub mod module {
                 }
             }
 
+
+            /// Message types that exist in the protocols. Some of these messages can only be sent
+            /// over certain types of transports).
             pub mod message {
                 use serde::{Deserialize, Serialize};
 
@@ -227,7 +231,6 @@ pub mod module {
                     data: String,
                 }
 
-                /// The various types of objects that can be encoded and passed over the wire.
                 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
                 pub struct Message {}
 
@@ -297,8 +300,8 @@ pub mod module {
                         }
 
                         fn decode_message(&self, message: &str) -> Result<Message, EncodingError> {
-                            let value: Message = serde_json::from_str(message)?;
-                            Ok(value)
+                            let m: Message = serde_json::from_str(message)?;
+                            Ok(m)
                         }
 
                         fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError> {
@@ -306,8 +309,8 @@ pub mod module {
                         }
 
                         fn decode_method(&self, method: &str) -> Result<Method, EncodingError> {
-                            let value: Method = serde_json::from_str(method)?;
-                            Ok(value)
+                            let m: Method = serde_json::from_str(method)?;
+                            Ok(m)
                         }
 
                         fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError> {
@@ -315,8 +318,8 @@ pub mod module {
                         }
 
                         fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError> {
-                            let value: Reply = serde_json::from_str(reply)?;
-                            Ok(value)
+                            let r: Reply = serde_json::from_str(reply)?;
+                            Ok(r)
                         }
 
                         fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError> {
@@ -324,8 +327,8 @@ pub mod module {
                         }
 
                         fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError> {
-                            let value: Signal = serde_json::from_str(signal)?;
-                            Ok(value)
+                            let s: Signal = serde_json::from_str(signal)?;
+                            Ok(s)
                         }
 
                         fn encode_exception(
@@ -342,8 +345,8 @@ pub mod module {
                             &self,
                             exception: &str,
                         ) -> Result<Exception, EncodingError> {
-                            let value: Exception = serde_json::from_str(exception)?;
-                            Ok(value)
+                            let e: Exception = serde_json::from_str(exception)?;
+                            Ok(e)
                         }
                     }
 
@@ -450,7 +453,7 @@ pub mod module {
             fn close(&mut self) -> Result<(), ChannelError>;
         }
 
-        /// The CommandChannel is used to receive commands from the host system.
+        /// Used to receive commands from the host system.
         pub struct CommandChannel<'a> {
             transport: &'a mut dyn transport::Transport,
             protocol: &'a mut dyn protocol::Protocol,
@@ -467,7 +470,7 @@ pub mod module {
             }
         }
 
-        /// The LogChannel is used to send logs back to the host system.
+        /// Used to send logs back to the host system.
         pub struct LogChannel<'a> {
             transport: &'a mut dyn transport::Transport,
             protocol: &'a mut dyn protocol::Protocol,
@@ -484,7 +487,7 @@ pub mod module {
             }
         }
 
-        /// The ProgressChannel is used send progress information back to the host system.
+        /// Used send progress information back to the host system.
         pub struct ProgressChannel<'a> {
             transport: &'a mut dyn transport::Transport,
             protocol: &'a mut dyn protocol::Protocol,
