@@ -73,9 +73,9 @@ pub mod module {
 
             impl Transport for UnixDGRAMSocket {
                 fn new(dst: String, src: Option<String>) -> Result<Self, TransportError> {
-                    let socket = UnixDatagram::bind(src.unwrap_or("".to_string()))?;
+                    let socket = UnixDatagram::bind(src.unwrap_or_else(|| "".to_string()))?;
 
-                    let instance = Self { socket: socket };
+                    let instance = Self { socket };
 
                     instance.socket.connect(dst)?;
 
