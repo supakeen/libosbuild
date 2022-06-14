@@ -269,9 +269,7 @@ pub mod module {
 
                     impl Encoding for JSONEncoding {
                         fn encode<T: Serialize>(&self, object: T) -> Result<Vec<u8>, EncodingError> {
-                            Ok(
-                                serde_json::to_string(&object)?.as_str().as_bytes().to_vec()
-                            )
+                            Ok(serde_json::to_string(&object)?.as_str().as_bytes().to_vec())
                         }
 
                         fn decode<T: DeserializeOwned>(&self, data: &str) -> Result<T, EncodingError> {
@@ -283,7 +281,6 @@ pub mod module {
                     #[cfg(test)]
                     mod test {
                         use std::str;
-
                         use super::*;
 
                         #[test]
@@ -322,7 +319,7 @@ pub mod module {
                             assert!(encoding.encode(method).is_ok());
 
                             let data = encoding.encode(method).unwrap();
-                            let object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
+                            let _object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
                         }
 
                         #[test]
@@ -333,7 +330,7 @@ pub mod module {
                             assert!(encoding.encode(signal).is_ok());
 
                             let data = encoding.encode(signal).unwrap();
-                            let object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
+                            let _object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
                         }
 
                         #[test]
@@ -344,7 +341,7 @@ pub mod module {
                             assert!(encoding.encode(exception).is_ok());
 
                             let data = encoding.encode(exception).unwrap();
-                            let object: Exception = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
+                            let _object: Exception = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
                         }
                     }
                 }
