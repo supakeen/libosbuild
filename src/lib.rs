@@ -261,18 +261,28 @@ pub mod module {
                     }
 
                     pub trait Encoding {
-                        fn encode<T: Serialize>(&self, object: T) -> Result<Vec<u8>, EncodingError>;
-                        fn decode<T: DeserializeOwned>(&self, data: &str) -> Result<T, EncodingError>;
+                        fn encode<T: Serialize>(&self, object: T)
+                            -> Result<Vec<u8>, EncodingError>;
+                        fn decode<T: DeserializeOwned>(
+                            &self,
+                            data: &str,
+                        ) -> Result<T, EncodingError>;
                     }
 
                     pub struct JSONEncoding {}
 
                     impl Encoding for JSONEncoding {
-                        fn encode<T: Serialize>(&self, object: T) -> Result<Vec<u8>, EncodingError> {
+                        fn encode<T: Serialize>(
+                            &self,
+                            object: T,
+                        ) -> Result<Vec<u8>, EncodingError> {
                             Ok(serde_json::to_string(&object)?.as_str().as_bytes().to_vec())
                         }
 
-                        fn decode<T: DeserializeOwned>(&self, data: &str) -> Result<T, EncodingError> {
+                        fn decode<T: DeserializeOwned>(
+                            &self,
+                            data: &str,
+                        ) -> Result<T, EncodingError> {
                             let object: T = serde_json::from_str(data)?;
                             Ok(object)
                         }
@@ -280,8 +290,8 @@ pub mod module {
 
                     #[cfg(test)]
                     mod test {
-                        use std::str;
                         use super::*;
+                        use std::str;
 
                         #[test]
                         fn test_encode_message() {
@@ -289,11 +299,10 @@ pub mod module {
                             let message = Message {};
 
                             assert!(encoding.encode(message).is_ok());
-
-                            let data = encoding.encode(message).unwrap();
-
                             assert!(encoding
-                                .decode::<Message>(str::from_utf8(&data).unwrap())
+                                .decode::<Message>(
+                                    str::from_utf8(&encoding.encode(message).unwrap()).unwrap()
+                                )
                                 .is_ok());
                         }
 
@@ -303,11 +312,10 @@ pub mod module {
                             let reply = Reply {};
 
                             assert!(encoding.encode(reply).is_ok());
-
-                            let data = encoding.encode(reply).unwrap();
-
                             assert!(encoding
-                                .decode::<Reply>(str::from_utf8(&data).unwrap())
+                                .decode::<Reply>(
+                                    str::from_utf8(&encoding.encode(reply).unwrap()).unwrap()
+                                )
                                 .is_ok());
                         }
 
@@ -317,9 +325,11 @@ pub mod module {
                             let method = Method {};
 
                             assert!(encoding.encode(method).is_ok());
-
-                            let data = encoding.encode(method).unwrap();
-                            let _object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
+                            assert!(encoding
+                                .decode::<Method>(
+                                    str::from_utf8(&encoding.encode(method).unwrap()).unwrap()
+                                )
+                                .is_ok());
                         }
 
                         #[test]
@@ -328,9 +338,11 @@ pub mod module {
                             let signal = Signal {};
 
                             assert!(encoding.encode(signal).is_ok());
-
-                            let data = encoding.encode(signal).unwrap();
-                            let _object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
+                            assert!(encoding
+                                .decode::<Signal>(
+                                    str::from_utf8(&encoding.encode(signal).unwrap()).unwrap()
+                                )
+                                .is_ok());
                         }
 
                         #[test]
@@ -339,9 +351,11 @@ pub mod module {
                             let exception = Exception {};
 
                             assert!(encoding.encode(exception).is_ok());
-
-                            let data = encoding.encode(exception).unwrap();
-                            let _object: Exception = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
+                            assert!(encoding
+                                .decode::<Exception>(
+                                    str::from_utf8(&encoding.encode(exception).unwrap()).unwrap()
+                                )
+                                .is_ok());
                         }
                     }
                 }
