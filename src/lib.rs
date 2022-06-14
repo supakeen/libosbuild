@@ -291,9 +291,9 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let message = Message {};
 
-                            assert!(encoding.encode::<Message>(message).is_ok());
+                            assert!(encoding.encode(message).is_ok());
 
-                            let data = encoding.encode::<Message>(message).unwrap();
+                            let data = encoding.encode(message).unwrap();
 
                             assert!(encoding
                                 .decode::<Message>(str::from_utf8(&data).unwrap())
@@ -305,9 +305,9 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let reply = Reply {};
 
-                            assert!(encoding.encode::<Reply>(reply).is_ok());
+                            assert!(encoding.encode(reply).is_ok());
 
-                            let data = encoding.encode::<Reply>(reply).unwrap();
+                            let data = encoding.encode(reply).unwrap();
 
                             assert!(encoding
                                 .decode::<Reply>(str::from_utf8(&data).unwrap())
@@ -319,13 +319,10 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let method = Method {};
 
-                            assert!(encoding.encode::<Method>(method).is_ok());
+                            assert!(encoding.encode(method).is_ok());
 
-                            let data = encoding.encode::<Method>(method).unwrap();
-
-                            assert!(encoding
-                                .decode::<Method>(str::from_utf8(&data).unwrap())
-                                .is_ok());
+                            let data = encoding.encode(method).unwrap();
+                            let object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
                         }
 
                         #[test]
@@ -333,13 +330,10 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let signal = Signal {};
 
-                            assert!(encoding.encode::<Signal>(signal).is_ok());
+                            assert!(encoding.encode(signal).is_ok());
 
-                            let data = encoding.encode::<Signal>(signal).unwrap();
-
-                            assert!(encoding
-                                .decode::<Signal>(str::from_utf8(&data).unwrap())
-                                .is_ok());
+                            let data = encoding.encode(signal).unwrap();
+                            let object: Method = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
                         }
 
                         #[test]
@@ -347,13 +341,10 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let exception = Exception {};
 
-                            assert!(encoding.encode::<Exception>(exception).is_ok());
+                            assert!(encoding.encode(exception).is_ok());
 
-                            let data = encoding.encode::<Exception>(exception).unwrap();
-
-                            assert!(encoding
-                                .decode::<Exception>(str::from_utf8(&data).unwrap())
-                                .is_ok());
+                            let data = encoding.encode(exception).unwrap();
+                            let object: Exception = encoding.decode(str::from_utf8(&data).unwrap()).unwrap();
                         }
                     }
                 }
