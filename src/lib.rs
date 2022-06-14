@@ -247,6 +247,7 @@ pub mod module {
 
                 pub mod encoding {
                     use super::*;
+                    use serde::de::DeserializeOwned;
 
                     #[derive(Debug)]
                     pub enum EncodingError {
@@ -260,92 +261,22 @@ pub mod module {
                     }
 
                     pub trait Encoding {
-                        fn encode_message(
-                            &self,
-                            message: Message,
-                        ) -> Result<Vec<u8>, EncodingError>;
-                        fn decode_message(&self, message: &str) -> Result<Message, EncodingError>;
-
-                        fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError>;
-                        fn decode_method(&self, method: &str) -> Result<Method, EncodingError>;
-
-                        fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError>;
-                        fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError>;
-
-                        fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError>;
-                        fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError>;
-
-                        fn encode_exception(
-                            &self,
-                            exception: Exception,
-                        ) -> Result<Vec<u8>, EncodingError>;
-                        fn decode_exception(
-                            &self,
-                            exception: &str,
-                        ) -> Result<Exception, EncodingError>;
+                        fn encode<T: Serialize>(&self, object: T) -> Result<Vec<u8>, EncodingError>;
+                        fn decode<T: DeserializeOwned>(&self, data: &str) -> Result<T, EncodingError>;
                     }
 
                     pub struct JSONEncoding {}
 
                     impl Encoding for JSONEncoding {
-                        fn encode_message(
-                            &self,
-                            message: Message,
-                        ) -> Result<Vec<u8>, EncodingError> {
-                            Ok(serde_json::to_string(&message)?
-                                .as_str()
-                                .as_bytes()
-                                .to_vec())
+                        fn encode<T: Serialize>(&self, object: T) -> Result<Vec<u8>, EncodingError> {
+                            Ok(
+                                serde_json::to_string(&object)?.as_str().as_bytes().to_vec()
+                            )
                         }
 
-                        fn decode_message(&self, message: &str) -> Result<Message, EncodingError> {
-                            let m: Message = serde_json::from_str(message)?;
-                            Ok(m)
-                        }
-
-                        fn encode_method(&self, method: Method) -> Result<Vec<u8>, EncodingError> {
-                            Ok(serde_json::to_string(&method)?.as_str().as_bytes().to_vec())
-                        }
-
-                        fn decode_method(&self, method: &str) -> Result<Method, EncodingError> {
-                            let m: Method = serde_json::from_str(method)?;
-                            Ok(m)
-                        }
-
-                        fn encode_reply(&self, reply: Reply) -> Result<Vec<u8>, EncodingError> {
-                            Ok(serde_json::to_string(&reply)?.as_str().as_bytes().to_vec())
-                        }
-
-                        fn decode_reply(&self, reply: &str) -> Result<Reply, EncodingError> {
-                            let r: Reply = serde_json::from_str(reply)?;
-                            Ok(r)
-                        }
-
-                        fn encode_signal(&self, signal: Signal) -> Result<Vec<u8>, EncodingError> {
-                            Ok(serde_json::to_string(&signal)?.as_str().as_bytes().to_vec())
-                        }
-
-                        fn decode_signal(&self, signal: &str) -> Result<Signal, EncodingError> {
-                            let s: Signal = serde_json::from_str(signal)?;
-                            Ok(s)
-                        }
-
-                        fn encode_exception(
-                            &self,
-                            exception: Exception,
-                        ) -> Result<Vec<u8>, EncodingError> {
-                            Ok(serde_json::to_string(&exception)?
-                                .as_str()
-                                .as_bytes()
-                                .to_vec())
-                        }
-
-                        fn decode_exception(
-                            &self,
-                            exception: &str,
-                        ) -> Result<Exception, EncodingError> {
-                            let e: Exception = serde_json::from_str(exception)?;
-                            Ok(e)
+                        fn decode<T: DeserializeOwned>(&self, data: &str) -> Result<T, EncodingError> {
+                            let object: T = serde_json::from_str(data)?;
+                            Ok(object)
                         }
                     }
 
@@ -360,12 +291,12 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let message = Message {};
 
-                            assert!(encoding.encode_message(message).is_ok());
+                            assert!(encoding.encode::<Message>(message).is_ok());
 
-                            let data = encoding.encode_message(message).unwrap();
+                            let data = encoding.encode::<Message>(message).unwrap();
 
                             assert!(encoding
-                                .decode_message(str::from_utf8(&data).unwrap())
+                                .decode::<Message>(str::from_utf8(&data).unwrap())
                                 .is_ok());
                         }
 
@@ -374,12 +305,12 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let reply = Reply {};
 
-                            assert!(encoding.encode_reply(reply).is_ok());
+                            assert!(encoding.encode::<Reply>(reply).is_ok());
 
-                            let data = encoding.encode_reply(reply).unwrap();
+                            let data = encoding.encode::<Reply>(reply).unwrap();
 
                             assert!(encoding
-                                .decode_reply(str::from_utf8(&data).unwrap())
+                                .decode::<Reply>(str::from_utf8(&data).unwrap())
                                 .is_ok());
                         }
 
@@ -388,12 +319,12 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let method = Method {};
 
-                            assert!(encoding.encode_method(method).is_ok());
+                            assert!(encoding.encode::<Method>(method).is_ok());
 
-                            let data = encoding.encode_method(method).unwrap();
+                            let data = encoding.encode::<Method>(method).unwrap();
 
                             assert!(encoding
-                                .decode_method(str::from_utf8(&data).unwrap())
+                                .decode::<Method>(str::from_utf8(&data).unwrap())
                                 .is_ok());
                         }
 
@@ -402,12 +333,12 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let signal = Signal {};
 
-                            assert!(encoding.encode_signal(signal).is_ok());
+                            assert!(encoding.encode::<Signal>(signal).is_ok());
 
-                            let data = encoding.encode_signal(signal).unwrap();
+                            let data = encoding.encode::<Signal>(signal).unwrap();
 
                             assert!(encoding
-                                .decode_signal(str::from_utf8(&data).unwrap())
+                                .decode::<Signal>(str::from_utf8(&data).unwrap())
                                 .is_ok());
                         }
 
@@ -416,12 +347,12 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let exception = Exception {};
 
-                            assert!(encoding.encode_exception(exception).is_ok());
+                            assert!(encoding.encode::<Exception>(exception).is_ok());
 
-                            let data = encoding.encode_exception(exception).unwrap();
+                            let data = encoding.encode::<Exception>(exception).unwrap();
 
                             assert!(encoding
-                                .decode_exception(str::from_utf8(&data).unwrap())
+                                .decode::<Exception>(str::from_utf8(&data).unwrap())
                                 .is_ok());
                         }
                     }
