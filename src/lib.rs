@@ -395,7 +395,7 @@ pub mod module {
         /// Used to receive commands from the host system.
         pub struct CommandChannel {
             transport: Box<dyn transport::Transport>,
-            protocol: Box<dyn protocol::Protocol>,
+            _protocol: Box<dyn protocol::Protocol>,
         }
 
         impl Channel for CommandChannel {
@@ -405,7 +405,7 @@ pub mod module {
                         "/run/osbuild/api/log".to_string(),
                         None,
                     )?),
-                    protocol: Box::new(protocol::JSONProtocol {}),
+                    _protocol: Box::new(protocol::JSONProtocol {}),
                 })
             }
 
@@ -422,7 +422,7 @@ pub mod module {
         /// Used to send logs back to the host system.
         pub struct LogChannel {
             transport: Box<dyn transport::Transport>,
-            protocol: Box<dyn protocol::Protocol>,
+            _protocol: Box<dyn protocol::Protocol>,
         }
 
         impl Channel for LogChannel {
@@ -432,7 +432,7 @@ pub mod module {
                         "/run/osbuild/api/log".to_string(),
                         None,
                     )?),
-                    protocol: Box::new(protocol::JSONProtocol {}),
+                    _protocol: Box::new(protocol::JSONProtocol {}),
                 })
             }
 
@@ -449,7 +449,7 @@ pub mod module {
         /// Used send progress information back to the host system.
         pub struct ProgressChannel {
             transport: Box<dyn transport::Transport>,
-            protocol: Box<dyn protocol::Protocol>,
+            _protocol: Box<dyn protocol::Protocol>,
         }
 
         impl Channel for ProgressChannel {
@@ -459,7 +459,7 @@ pub mod module {
                         "/run/osbuild/api/progress".to_string(),
                         None,
                     )?),
-                    protocol: Box::new(protocol::JSONProtocol {}),
+                    _protocol: Box::new(protocol::JSONProtocol {}),
                 })
             }
 
