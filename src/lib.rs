@@ -219,6 +219,14 @@ pub mod module {
             pub mod message {
                 use serde::{Deserialize, Serialize};
 
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub enum MessageType {
+                    Method,
+                    Reply,
+                    Signal,
+                    Exception,
+                }
+
                 #[derive(Debug)]
                 pub enum MessageError {}
 
@@ -229,7 +237,7 @@ pub mod module {
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Method {
-                    r#type: String,
+                    r#type: MessageType,
                     method: String,
                     data: MethodData,
                 }
@@ -240,7 +248,7 @@ pub mod module {
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Reply {
-                    r#type: String,
+                    r#type: MessageType,
                     data: ReplyData,
                 }
 
@@ -250,7 +258,7 @@ pub mod module {
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Signal {
-                    r#type: String,
+                    r#type: MessageType,
                     data: SignalData,
                 }
 
@@ -263,7 +271,7 @@ pub mod module {
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Exception {
-                    r#type: String,
+                    r#type: MessageType,
                     data: ExceptionData,
                 }
 
@@ -318,7 +326,7 @@ pub mod module {
                         fn test_encode_reply() {
                             let encoding = JSONEncoding {};
                             let reply = Reply {
-                                r#type: "reply".to_string(),
+                                r#type: MessageType::Reply,
                                 data: ReplyData{}
                             };
 
@@ -333,7 +341,7 @@ pub mod module {
                         fn test_encode_method() {
                             let encoding = JSONEncoding {};
                             let method = Method {
-                                r#type: "method".to_string(),
+                                r#type: MessageType::Method,
                                 method: "test".to_string(),
                                 data: MethodData{
                                     name: "name".to_string(),
@@ -351,7 +359,7 @@ pub mod module {
                         fn test_encode_signal() {
                             let encoding = JSONEncoding {};
                             let signal = Signal {
-                                r#type: "signal".to_string(),
+                                r#type: MessageType::Signal,
                                 data: SignalData{},
                             };
 
@@ -366,7 +374,7 @@ pub mod module {
                         fn test_encode_exception() {
                             let encoding = JSONEncoding {};
                             let exception = Exception {
-                                r#type: "exception".to_string(),
+                                r#type: MessageType::Exception,
                                 data: ExceptionData{
                                     name: "foo".to_string(),
                                     value: "foo".to_string(),
