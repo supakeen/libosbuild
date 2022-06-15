@@ -224,27 +224,27 @@ pub mod module {
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Message {
-                    r#type: String,
+                    method: String,
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Method {
-                    r#type: String,
+                    method: String,
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Reply {
-                    r#type: String,
+                    method: String,
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Signal {
-                    r#type: String,
+                    method: String,
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Exception {
-                    r#type: String,
+                    method: String,
                 }
 
                 pub mod encoding {
@@ -297,7 +297,7 @@ pub mod module {
                         #[test]
                         fn test_encode_message() {
                             let encoding = JSONEncoding {};
-                            let message = Message { r#type: "message".to_string() };
+                            let message = Message { method: "message".to_string() };
 
                             assert!(encoding
                                 .decode::<Message>(
@@ -309,7 +309,7 @@ pub mod module {
                         #[test]
                         fn test_encode_reply() {
                             let encoding = JSONEncoding {};
-                            let reply = Reply { r#type: "reply".to_string() };
+                            let reply = Reply { method: "reply".to_string() };
 
                             assert!(encoding
                                 .decode::<Reply>(
@@ -321,7 +321,7 @@ pub mod module {
                         #[test]
                         fn test_encode_method() {
                             let encoding = JSONEncoding {};
-                            let method = Method { r#type: "method".to_string() };
+                            let method = Method { method: "method".to_string() };
 
                             assert!(encoding
                                 .decode::<Method>(
@@ -333,7 +333,7 @@ pub mod module {
                         #[test]
                         fn test_encode_signal() {
                             let encoding = JSONEncoding {};
-                            let signal = Signal { r#type: "signal".to_string() };
+                            let signal = Signal { method: "signal".to_string() };
 
                             assert!(encoding
                                 .decode::<Signal>(
@@ -345,7 +345,7 @@ pub mod module {
                         #[test]
                         fn test_encode_exception() {
                             let encoding = JSONEncoding {};
-                            let exception = Exception { r#type: "exception".to_string() };
+                            let exception = Exception { method: "exception".to_string() };
 
                             assert!(encoding
                                 .decode::<Exception>(
