@@ -222,28 +222,30 @@ pub mod module {
                 #[derive(Debug)]
                 pub enum MessageError {}
 
-                /// All types of objects are contained inside a wrapper object which contains the type and
-                /// the data used.
                 #[derive(Serialize, Deserialize, Debug, Clone)]
-                pub struct Envelope {
+                pub struct Message {
                     r#type: String,
-                    data: String,
                 }
 
-                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-                pub struct Message {}
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct Method {
+                    r#type: String,
+                }
 
-                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-                pub struct Method {}
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct Reply {
+                    r#type: String,
+                }
 
-                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-                pub struct Reply {}
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct Signal {
+                    r#type: String,
+                }
 
-                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-                pub struct Signal {}
-
-                #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-                pub struct Exception {}
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct Exception {
+                    r#type: String,
+                }
 
                 pub mod encoding {
                     use super::*;
@@ -295,9 +297,8 @@ pub mod module {
                         #[test]
                         fn test_encode_message() {
                             let encoding = JSONEncoding {};
-                            let message = Message {};
+                            let message = Message { r#type: "message".to_string() };
 
-                            assert!(encoding.encode(message).is_ok());
                             assert!(encoding
                                 .decode::<Message>(
                                     str::from_utf8(&encoding.encode(message).unwrap()).unwrap()
@@ -308,9 +309,8 @@ pub mod module {
                         #[test]
                         fn test_encode_reply() {
                             let encoding = JSONEncoding {};
-                            let reply = Reply {};
+                            let reply = Reply { r#type: "reply".to_string() };
 
-                            assert!(encoding.encode(reply).is_ok());
                             assert!(encoding
                                 .decode::<Reply>(
                                     str::from_utf8(&encoding.encode(reply).unwrap()).unwrap()
@@ -321,9 +321,8 @@ pub mod module {
                         #[test]
                         fn test_encode_method() {
                             let encoding = JSONEncoding {};
-                            let method = Method {};
+                            let method = Method { r#type: "method".to_string() };
 
-                            assert!(encoding.encode(method).is_ok());
                             assert!(encoding
                                 .decode::<Method>(
                                     str::from_utf8(&encoding.encode(method).unwrap()).unwrap()
@@ -334,9 +333,8 @@ pub mod module {
                         #[test]
                         fn test_encode_signal() {
                             let encoding = JSONEncoding {};
-                            let signal = Signal {};
+                            let signal = Signal { r#type: "signal".to_string() };
 
-                            assert!(encoding.encode(signal).is_ok());
                             assert!(encoding
                                 .decode::<Signal>(
                                     str::from_utf8(&encoding.encode(signal).unwrap()).unwrap()
@@ -347,9 +345,8 @@ pub mod module {
                         #[test]
                         fn test_encode_exception() {
                             let encoding = JSONEncoding {};
-                            let exception = Exception {};
+                            let exception = Exception { r#type: "exception".to_string() };
 
-                            assert!(encoding.encode(exception).is_ok());
                             assert!(encoding
                                 .decode::<Exception>(
                                     str::from_utf8(&encoding.encode(exception).unwrap()).unwrap()
