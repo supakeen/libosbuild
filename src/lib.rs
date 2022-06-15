@@ -276,15 +276,14 @@ pub mod module {
                             &self,
                             object: T,
                         ) -> Result<Vec<u8>, EncodingError> {
-                            Ok(serde_json::to_string(&object)?.as_str().as_bytes().to_vec())
+                            Ok(serde_json::to_vec(&object)?)
                         }
 
                         fn decode<T: DeserializeOwned>(
                             &self,
                             data: &str,
                         ) -> Result<T, EncodingError> {
-                            let object: T = serde_json::from_str(data)?;
-                            Ok(object)
+                            Ok(serde_json::from_str(data)?)
                         }
                     }
 
