@@ -223,23 +223,48 @@ pub mod module {
                 pub enum MessageError {}
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct MethodData {
+                    name: String,
+                }
+
+                #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Method {
+                    r#type: String,
                     method: String,
+                    data: MethodData,
+                }
+
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct ReplyData {
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Reply {
-                    method: String,
+                    r#type: String,
+                    data: ReplyData,
+                }
+
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct SignalData {
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Signal {
-                    method: String,
+                    r#type: String,
+                    data: SignalData,
+                }
+
+                #[derive(Serialize, Deserialize, Debug, Clone)]
+                pub struct ExceptionData {
+                    name: String,
+                    value: String,
+                    backtrace: String,
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Exception {
-                    method: String,
+                    r#type: String,
+                    data: ExceptionData,
                 }
 
                 pub mod encoding {
@@ -292,7 +317,10 @@ pub mod module {
                         #[test]
                         fn test_encode_reply() {
                             let encoding = JSONEncoding {};
-                            let reply = Reply { method: "reply".to_string() };
+                            let reply = Reply {
+                                r#type: "reply".to_string(),
+                                data: ReplyData{}
+                            };
 
                             assert!(encoding
                                 .decode::<Reply>(
@@ -304,7 +332,13 @@ pub mod module {
                         #[test]
                         fn test_encode_method() {
                             let encoding = JSONEncoding {};
-                            let method = Method { method: "method".to_string() };
+                            let method = Method {
+                                r#type: "method".to_string(),
+                                method: "test".to_string(),
+                                data: MethodData{
+                                    name: "name".to_string(),
+                                },
+                            };
 
                             assert!(encoding
                                 .decode::<Method>(
@@ -316,7 +350,10 @@ pub mod module {
                         #[test]
                         fn test_encode_signal() {
                             let encoding = JSONEncoding {};
-                            let signal = Signal { method: "signal".to_string() };
+                            let signal = Signal {
+                                r#type: "signal".to_string(),
+                                data: SignalData{},
+                            };
 
                             assert!(encoding
                                 .decode::<Signal>(
@@ -328,7 +365,14 @@ pub mod module {
                         #[test]
                         fn test_encode_exception() {
                             let encoding = JSONEncoding {};
-                            let exception = Exception { method: "exception".to_string() };
+                            let exception = Exception {
+                                r#type: "exception".to_string(),
+                                data: ExceptionData{
+                                    name: "foo".to_string(),
+                                    value: "foo".to_string(),
+                                    backtrace: "foo".to_string(),
+                                },
+                            };
 
                             assert!(encoding
                                 .decode::<Exception>(
