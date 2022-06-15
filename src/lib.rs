@@ -449,60 +449,6 @@ pub mod module {
                 Ok(())
             }
         }
-
-        /// Used to send logs back to the host system.
-        pub struct LogChannel {
-            transport: Box<dyn transport::Transport>,
-            _protocol: Box<dyn protocol::Protocol>,
-        }
-
-        impl Channel for LogChannel {
-            fn new_default() -> Result<Self, ChannelError> {
-                Ok(Self {
-                    transport: Box::new(transport::UnixDGRAMSocket::new(
-                        "/run/osbuild/api/log".to_string(),
-                        None,
-                    )?),
-                    _protocol: Box::new(protocol::JSONProtocol {}),
-                })
-            }
-
-            fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
-                Ok(())
-            }
-
-            fn close(&mut self) -> Result<(), ChannelError> {
-                self.transport.close()?;
-                Ok(())
-            }
-        }
-
-        /// Used send progress information back to the host system.
-        pub struct ProgressChannel {
-            transport: Box<dyn transport::Transport>,
-            _protocol: Box<dyn protocol::Protocol>,
-        }
-
-        impl Channel for ProgressChannel {
-            fn new_default() -> Result<Self, ChannelError> {
-                Ok(Self {
-                    transport: Box::new(transport::UnixDGRAMSocket::new(
-                        "/run/osbuild/api/progress".to_string(),
-                        None,
-                    )?),
-                    _protocol: Box::new(protocol::JSONProtocol {}),
-                })
-            }
-
-            fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
-                Ok(())
-            }
-
-            fn close(&mut self) -> Result<(), ChannelError> {
-                self.transport.close()?;
-                Ok(())
-            }
-        }
     }
 }
 
