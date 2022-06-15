@@ -223,11 +223,6 @@ pub mod module {
                 pub enum MessageError {}
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
-                pub struct Message {
-                    method: String,
-                }
-
-                #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Method {
                     method: String,
                 }
@@ -293,18 +288,6 @@ pub mod module {
                     mod test {
                         use super::*;
                         use std::str;
-
-                        #[test]
-                        fn test_encode_message() {
-                            let encoding = JSONEncoding {};
-                            let message = Message { method: "message".to_string() };
-
-                            assert!(encoding
-                                .decode::<Message>(
-                                    str::from_utf8(&encoding.encode(message).unwrap()).unwrap()
-                                )
-                                .is_ok());
-                        }
 
                         #[test]
                         fn test_encode_reply() {
