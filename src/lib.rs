@@ -63,6 +63,7 @@ pub mod module {
 
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError>;
                 fn send(&self, buf: &[u8]) -> Result<usize, TransportError>;
+                fn send_all(&self, buf: &[u8]) -> Result<usize, TransportError>;
             }
 
             /// A UnixDGRAMSocket Transport to send data back and forth over a SOCK_DGRAM, AF_UNIX
@@ -99,6 +100,16 @@ pub mod module {
 
                     Ok(size)
                 }
+
+                fn send_all(&self, buf: &[u8]) -> Result<usize, TransportError> {
+                    let mut sent = 0;
+
+                    while sent < buf.len() {
+                        sent += self.send(buf)?;
+                    }
+
+                    Ok(sent)
+                }
             }
 
             /// A UnixSTREAMSocket Transport to send data back and forth over a SOCK_STREAM, AF_UNIX
@@ -126,6 +137,16 @@ pub mod module {
 
                 fn send(&self, _buf: &[u8]) -> Result<usize, TransportError> {
                     Ok(1)
+                }
+
+                fn send_all(&self, buf: &[u8]) -> Result<usize, TransportError> {
+                    let mut sent = 0;
+
+                    while sent < buf.len() {
+                        sent += self.send(buf)?;
+                    }
+
+                    Ok(sent)
                 }
             }
 
@@ -473,7 +494,7 @@ pub mod module {
             fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError> {
                 let enc = JSONEncoding {};
 
-                self.transport.send(&enc.encode(object)?)?;
+                self.transport.send_all(&enc.encode(object)?)?;
 
                 Ok(())
             }
