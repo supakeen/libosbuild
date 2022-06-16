@@ -433,23 +433,30 @@ pub mod module {
             }
         }
 
+        /// The `Channel` trait encapsulates bidirectional communication between the buildroot
+        /// where modules are executed and the host system. It allows for sending `Message`'s back
+        /// and forth and the setup of communications.
         pub trait Channel {
-            /// Open a channel with new_default settings as proposed by the `lib_osbuild` version.
+            /// Prepare a channel with new_default settings as proposed by the `lib_osbuild` version.
             fn new_default() -> Result<Self, ChannelError>
             where
                 Self: Sized;
 
+            /// Open the channel to a given destination, the destination is dependent on the
+            /// transport used in the implementation.
             fn open(&mut self, dst: &str) -> Result<(), ChannelError>;
 
+            /// Send a `Message` across the `Channel` using the encoding specified by the protocol
+            /// used in the implementation.
             fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError>;
 
             fn close(&mut self) -> Result<(), ChannelError>;
         }
 
-        /// Used to receive commands from the host system.
+        /// `CommandChannel` is used to receive and send commands from and to the host system.
         pub struct CommandChannel {
-            transport: Box<dyn transport::Transport>,
-            protocol: Box<dyn protocol::Protocol>,
+            pub transport: Box<dyn transport::Transport>,
+            pub protocol: Box<dyn protocol::Protocol>,
         }
 
         impl Channel for CommandChannel {
