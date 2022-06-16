@@ -90,15 +90,11 @@ pub mod module {
                 }
 
                 fn recv(&self, buf: &mut [u8]) -> Result<usize, TransportError> {
-                    let size = self.socket.recv(buf)?;
-
-                    Ok(size)
+                    Ok(self.socket.recv(buf)?)
                 }
 
                 fn send(&self, buf: &[u8]) -> Result<usize, TransportError> {
-                    let size = self.socket.send(buf)?;
-
-                    Ok(size)
+                    Ok(self.socket.send(buf)?)
                 }
 
                 fn send_all(&self, buf: &[u8]) -> Result<usize, TransportError> {
