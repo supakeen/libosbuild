@@ -230,6 +230,8 @@ pub mod module {
                 #[derive(Debug)]
                 pub enum MessageError {}
 
+                pub trait Message {}
+
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct MethodData {
                     name: String,
@@ -242,9 +244,10 @@ pub mod module {
                     data: MethodData,
                 }
 
+                impl Message for Method {}
+
                 #[derive(Serialize, Deserialize, Debug, Clone)]
-                pub struct ReplyData {
-                }
+                pub struct ReplyData {}
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Reply {
@@ -252,15 +255,18 @@ pub mod module {
                     data: ReplyData,
                 }
 
+                impl Message for Reply {}
+
                 #[derive(Serialize, Deserialize, Debug, Clone)]
-                pub struct SignalData {
-                }
+                pub struct SignalData {}
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Signal {
                     r#type: MessageType,
                     data: SignalData,
                 }
+
+                impl Message for Signal {}
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct ExceptionData {
@@ -274,6 +280,8 @@ pub mod module {
                     r#type: MessageType,
                     data: ExceptionData,
                 }
+
+                impl Message for Exception {}
 
                 pub mod encoding {
                     use super::*;
@@ -327,7 +335,7 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let reply = Reply {
                                 r#type: MessageType::Reply,
-                                data: ReplyData{}
+                                data: ReplyData {},
                             };
 
                             assert!(encoding
@@ -343,7 +351,7 @@ pub mod module {
                             let method = Method {
                                 r#type: MessageType::Method,
                                 method: "test".to_string(),
-                                data: MethodData{
+                                data: MethodData {
                                     name: "name".to_string(),
                                 },
                             };
@@ -360,7 +368,7 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let signal = Signal {
                                 r#type: MessageType::Signal,
-                                data: SignalData{},
+                                data: SignalData {},
                             };
 
                             assert!(encoding
@@ -375,7 +383,7 @@ pub mod module {
                             let encoding = JSONEncoding {};
                             let exception = Exception {
                                 r#type: MessageType::Exception,
-                                data: ExceptionData{
+                                data: ExceptionData {
                                     name: "foo".to_string(),
                                     value: "foo".to_string(),
                                     backtrace: "foo".to_string(),
@@ -395,10 +403,16 @@ pub mod module {
 
         use transport::Transport;
 
+        use protocol::message::encoding::*;
+        use protocol::message::*;
+
+        use serde::Serialize;
+
         #[derive(Debug)]
         pub enum ChannelError {
             TransportError(transport::TransportError),
             ProtocolError(protocol::ProtocolError),
+            EncodingError(protocol::message::encoding::EncodingError),
         }
 
         impl From<transport::TransportError> for ChannelError {
@@ -413,6 +427,12 @@ pub mod module {
             }
         }
 
+        impl From<protocol::message::encoding::EncodingError> for ChannelError {
+            fn from(err: protocol::message::encoding::EncodingError) -> Self {
+                Self::EncodingError(err)
+            }
+        }
+
         pub trait Channel {
             /// Open a channel with new_default settings as proposed by the `lib_osbuild` version.
             fn new_default() -> Result<Self, ChannelError>
@@ -420,13 +440,16 @@ pub mod module {
                 Self: Sized;
 
             fn open(&mut self, dst: &str) -> Result<(), ChannelError>;
+
+            fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError>;
+
             fn close(&mut self) -> Result<(), ChannelError>;
         }
 
         /// Used to receive commands from the host system.
         pub struct CommandChannel {
             transport: Box<dyn transport::Transport>,
-            _protocol: Box<dyn protocol::Protocol>,
+            protocol: Box<dyn protocol::Protocol>,
         }
 
         impl Channel for CommandChannel {
@@ -436,8 +459,16 @@ pub mod module {
                         "/run/osbuild/api/log".to_string(),
                         None,
                     )?),
-                    _protocol: Box::new(protocol::JSONProtocol {}),
+                    protocol: Box::new(protocol::JSONProtocol {}),
                 })
+            }
+
+            fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError> {
+                let enc = JSONEncoding {};
+
+                self.transport.send(&enc.encode(object)?)?;
+
+                Ok(())
             }
 
             fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
