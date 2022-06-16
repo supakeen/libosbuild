@@ -196,6 +196,23 @@ pub mod module {
                 }
 
                 #[test]
+                fn unixdgramsocket_send_all() {
+                    // XXX can we use autobound sockets here as well?
+                    let path = "/tmp/socket-send-all";
+                    let sock = UnixDatagram::bind(path).unwrap();
+
+                    let transport = UnixDGRAMSocket::new(path.to_string(), None).unwrap();
+                    transport.send_all(b"foo").unwrap();
+
+                    let mut buffer = vec![0; 3];
+                    sock.recv_from(buffer.as_mut_slice()).unwrap();
+
+                    assert_eq!(buffer, b"foo");
+
+                    remove_file(path).unwrap();
+                }
+
+                #[test]
                 fn unixstreamsocket_non_existent_path() {
                     assert!(UnixSTREAMSocket::new("/tmp/non-existent".to_string(), None).is_err());
                 }
@@ -424,6 +441,9 @@ pub mod module {
         use protocol::message::*;
 
         use serde::Serialize;
+        use serde::de::DeserializeOwned;
+
+        use std::str;
 
         #[derive(Debug)]
         pub enum ChannelError {
@@ -467,6 +487,10 @@ pub mod module {
             /// used in the implementation.
             fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError>;
 
+            /// Receive a `Message` across the `Channel`, you have to indicate the type of Message
+            /// you want to receive.
+            fn recv<T: Message + DeserializeOwned>(&mut self) -> Result<T, ChannelError>;
+
             fn close(&mut self) -> Result<(), ChannelError>;
         }
 
@@ -493,6 +517,17 @@ pub mod module {
                 self.transport.send_all(&enc.encode(object)?)?;
 
                 Ok(())
+            }
+
+            fn recv<T: Message + DeserializeOwned>(&mut self) -> Result<T, ChannelError> {
+                let enc = JSONEncoding {};
+
+                // XXX let the protocol handle this, it knows boundaries for encoded messages
+                let mut dat = vec![0u8; 1024];
+
+                self.transport.recv(&mut dat)?;
+
+                Ok(enc.decode::<T>(str::from_utf8(&dat).unwrap())?)
             }
 
             fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
