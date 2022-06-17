@@ -566,7 +566,6 @@ pub mod module {
             use std::os::unix::net::UnixDatagram;
 
             use super::*;
-            use super::transport::*;
 
             #[test]
             fn command_channel_send() {
@@ -575,10 +574,9 @@ pub mod module {
                 let sock = UnixDatagram::bind(path.to_string()).unwrap();
 
                 let mut channel = CommandChannel {
-                    transport: Box::new(transport::UnixDGRAMSocket::new(
-                        path.to_string(),
-                        None,
-                    ).unwrap()),
+                    transport: Box::new(
+                        transport::UnixDGRAMSocket::new(path.to_string(), None).unwrap(),
+                    ),
                     protocol: Box::new(protocol::JSONProtocol {}),
                 };
 
@@ -592,8 +590,13 @@ pub mod module {
 
                 let size = channel.send(method).unwrap();
                 let mut buffer = vec![0; size];
+
                 sock.recv_from(buffer.as_mut_slice()).unwrap();
-                assert_eq!(buffer, b"{\"type\":\"Method\",\"method\":\"test\",\"data\":{\"name\":\"name\"}}");
+
+                assert_eq!(
+                    buffer,
+                    b"{\"type\":\"Method\",\"method\":\"test\",\"data\":{\"name\":\"name\"}}"
+                );
 
                 remove_file(path).unwrap();
             }
