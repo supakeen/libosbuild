@@ -603,6 +603,3 @@ pub mod module {
         }
     }
 }
-
-/// Traits for handling osbuild manifest files.
-pub mod manifest {}
