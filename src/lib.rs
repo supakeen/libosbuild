@@ -268,14 +268,14 @@ pub mod module {
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct MethodData {
-                    name: String,
+                    pub name: String,
                 }
 
                 #[derive(Serialize, Deserialize, Debug, Clone)]
                 pub struct Method {
-                    r#type: MessageType,
-                    method: String,
-                    data: MethodData,
+                    pub r#type: MessageType,
+                    pub method: String,
+                    pub data: MethodData,
                 }
 
                 impl Message for Method {}
@@ -485,7 +485,7 @@ pub mod module {
 
             /// Send a `Message` across the `Channel` using the encoding specified by the protocol
             /// used in the implementation.
-            fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError>;
+            fn send<T: Message + Serialize>(&mut self, object: T) -> Result<usize, ChannelError>;
 
             /// Send a `Message` and receive a `Message` across the `Channel`.
             fn send_and_recv<T0: Message + Serialize, T1: Message + DeserializeOwned>(
@@ -517,12 +517,10 @@ pub mod module {
                 })
             }
 
-            fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError> {
+            fn send<T: Message + Serialize>(&mut self, object: T) -> Result<usize, ChannelError> {
                 let enc = JSONEncoding {};
 
-                self.transport.send_all(&enc.encode(object)?)?;
-
-                Ok(())
+                Ok(self.transport.send_all(&enc.encode(object)?)?)
             }
 
             fn recv<T: Message + DeserializeOwned>(&mut self) -> Result<T, ChannelError> {
@@ -564,9 +562,40 @@ pub mod module {
 
         #[cfg(test)]
         mod test {
+            use std::fs::remove_file;
+            use std::os::unix::net::UnixDatagram;
+
+            use super::*;
+            use super::transport::*;
+
             #[test]
-            fn test() {
-                assert_eq!(1, 1);
+            fn command_channel_send() {
+                // XXX can we use autobound sockets here as well?
+                let path = "/tmp/channel";
+                let sock = UnixDatagram::bind(path.to_string()).unwrap();
+
+                let mut channel = CommandChannel {
+                    transport: Box::new(transport::UnixDGRAMSocket::new(
+                        path.to_string(),
+                        None,
+                    ).unwrap()),
+                    protocol: Box::new(protocol::JSONProtocol {}),
+                };
+
+                let method = Method {
+                    r#type: MessageType::Method,
+                    method: "test".to_string(),
+                    data: MethodData {
+                        name: "name".to_string(),
+                    },
+                };
+
+                let size = channel.send(method).unwrap();
+                let mut buffer = vec![0; size];
+                sock.recv_from(buffer.as_mut_slice()).unwrap();
+                assert_eq!(buffer, b"{\"type\":\"Method\",\"method\":\"test\",\"data\":{\"name\":\"name\"}}");
+
+                remove_file(path).unwrap();
             }
         }
     }
