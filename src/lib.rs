@@ -440,8 +440,8 @@ pub mod module {
         use protocol::message::encoding::*;
         use protocol::message::*;
 
-        use serde::Serialize;
         use serde::de::DeserializeOwned;
+        use serde::Serialize;
 
         use std::str;
 
@@ -487,6 +487,12 @@ pub mod module {
             /// used in the implementation.
             fn send<T: Message + Serialize>(&mut self, object: T) -> Result<(), ChannelError>;
 
+            /// Send a `Message` and receive a `Message` across the `Channel`.
+            fn send_and_recv<T0: Message + Serialize, T1: Message + DeserializeOwned>(
+                &mut self,
+                object: T0,
+            ) -> Result<T1, ChannelError>;
+
             /// Receive a `Message` across the `Channel`, you have to indicate the type of Message
             /// you want to receive.
             fn recv<T: Message + DeserializeOwned>(&mut self) -> Result<T, ChannelError>;
@@ -530,6 +536,22 @@ pub mod module {
                 Ok(enc.decode::<T>(str::from_utf8(&dat).unwrap())?)
             }
 
+            fn send_and_recv<T0: Message + Serialize, T1: Message + DeserializeOwned>(
+                &mut self,
+                object: T0,
+            ) -> Result<T1, ChannelError> {
+                let enc = JSONEncoding {};
+
+                self.transport.send_all(&enc.encode(object)?)?;
+
+                // XXX let the protocol handle this, it knows boundaries for encoded messages
+                let mut dat = vec![0u8; 1024];
+
+                self.transport.recv(&mut dat)?;
+
+                Ok(enc.decode::<T1>(str::from_utf8(&dat).unwrap())?)
+            }
+
             fn open(&mut self, _path: &str) -> Result<(), ChannelError> {
                 Ok(())
             }
@@ -537,6 +559,14 @@ pub mod module {
             fn close(&mut self) -> Result<(), ChannelError> {
                 self.transport.close()?;
                 Ok(())
+            }
+        }
+
+        #[cfg(test)]
+        mod test {
+            #[test]
+            fn test() {
+                assert_eq!(1, 1);
             }
         }
     }
