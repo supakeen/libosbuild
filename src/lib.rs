@@ -150,79 +150,87 @@ pub mod module {
             mod test {
                 use super::*;
 
-                use std::fs::remove_file;
+                use std::panic;
+
+                use std::fs::{metadata, remove_file};
                 use std::os::unix::net::UnixDatagram;
 
-                #[test]
-                fn unixdgramsocket_non_existent_path() {
-                    assert!(UnixDGRAMSocket::new("/tmp/non-existent".to_string(), None).is_err());
+                use rand::distributions::Alphanumeric;
+                use rand::{thread_rng, Rng};
+
+                fn with_path<T>(test: T) -> ()
+                where
+                    T: FnOnce(&str) + panic::UnwindSafe,
+                {
+                    // generate a path that does not exist
+                    let data = thread_rng()
+                        .sample_iter(&Alphanumeric)
+                        .take(32)
+                        .map(char::from)
+                        .collect::<String>();
+
+                    let path = data.as_str();
+
+                    let result = panic::catch_unwind(|| test(path));
+
+                    // remove the path again if it was created during the test
+                    if metadata(path).is_ok() {
+                        remove_file(path).expect("Unable to remove test file.");
+                    }
+
+                    assert!(result.is_ok());
                 }
 
                 #[test]
-                fn unixdgramsocket_non_existent_directory() {
-                    assert!(
-                        UnixDGRAMSocket::new("/non-existent/non-existent".to_string(), None)
-                            .is_err()
-                    );
+                fn unixdgramsocket_non_existent_path() {
+                    with_path(|path| {
+                        assert!(UnixDGRAMSocket::new(path.to_string(), None).is_err());
+                    })
                 }
 
                 #[test]
                 fn unixdgramsocket_exists() {
-                    // XXX can we use autobound sockets here as well?
-                    let path = "/tmp/socket";
-
-                    let _sock = UnixDatagram::bind(path).unwrap();
-
-                    assert!(UnixDGRAMSocket::new(path.to_string(), None).is_ok());
-
-                    remove_file(path).unwrap();
+                    with_path(|path| {
+                        let _sock = UnixDatagram::bind(path).unwrap();
+                        assert!(UnixDGRAMSocket::new(path.to_string(), None).is_ok());
+                    })
                 }
 
                 #[test]
                 fn unixdgramsocket_send() {
-                    // XXX can we use autobound sockets here as well?
-                    let path = "/tmp/socket-send";
-                    let sock = UnixDatagram::bind(path).unwrap();
+                    with_path(|path| {
+                        let sock = UnixDatagram::bind(path).unwrap();
 
-                    let transport = UnixDGRAMSocket::new(path.to_string(), None).unwrap();
-                    transport.send(b"foo").unwrap();
+                        let transport = UnixDGRAMSocket::new(path.to_string(), None).unwrap();
+                        transport.send(b"foo").unwrap();
 
-                    let mut buffer = vec![0; 3];
-                    sock.recv_from(buffer.as_mut_slice()).unwrap();
+                        let mut buffer = vec![0; 3];
+                        sock.recv_from(buffer.as_mut_slice()).unwrap();
 
-                    assert_eq!(buffer, b"foo");
-
-                    remove_file(path).unwrap();
+                        assert_eq!(buffer, b"foo");
+                    })
                 }
 
                 #[test]
                 fn unixdgramsocket_send_all() {
-                    // XXX can we use autobound sockets here as well?
-                    let path = "/tmp/socket-send-all";
-                    let sock = UnixDatagram::bind(path).unwrap();
+                    with_path(|path| {
+                        let sock = UnixDatagram::bind(path).unwrap();
 
-                    let transport = UnixDGRAMSocket::new(path.to_string(), None).unwrap();
-                    transport.send_all(b"foo").unwrap();
+                        let transport = UnixDGRAMSocket::new(path.to_string(), None).unwrap();
+                        transport.send_all(b"foo").unwrap();
 
-                    let mut buffer = vec![0; 3];
-                    sock.recv_from(buffer.as_mut_slice()).unwrap();
+                        let mut buffer = vec![0; 3];
+                        sock.recv_from(buffer.as_mut_slice()).unwrap();
 
-                    assert_eq!(buffer, b"foo");
-
-                    remove_file(path).unwrap();
+                        assert_eq!(buffer, b"foo");
+                    })
                 }
 
                 #[test]
                 fn unixstreamsocket_non_existent_path() {
-                    assert!(UnixSTREAMSocket::new("/tmp/non-existent".to_string(), None).is_err());
-                }
-
-                #[test]
-                fn unixstreamsocket_non_existent_directory() {
-                    assert!(
-                        UnixSTREAMSocket::new("/non-existent/non-existent".to_string(), None)
-                            .is_err()
-                    );
+                    with_path(|path| {
+                        assert!(UnixSTREAMSocket::new(path.to_string(), None).is_err());
+                    })
                 }
             }
         }
@@ -593,6 +601,8 @@ pub mod module {
 
                 sock.recv_from(buffer.as_mut_slice()).unwrap();
 
+                // XXX kinda weird, do we want to take this from an encoding step instead to
+                // confirm the message wasn't erroneously translated or is a literal fine?
                 assert_eq!(
                     buffer,
                     b"{\"type\":\"Method\",\"method\":\"test\",\"data\":{\"name\":\"name\"}}"
