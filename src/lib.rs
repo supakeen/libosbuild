@@ -613,3 +613,7 @@ pub mod module {
         }
     }
 }
+
+/// Dependency solving tasks
+pub mod dependencies {
+}
