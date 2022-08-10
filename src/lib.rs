@@ -577,7 +577,6 @@ pub mod module {
 
             #[test]
             fn command_channel_send() {
-                // XXX can we use autobound sockets here as well?
                 let path = "/tmp/channel";
                 let sock = UnixDatagram::bind(path.to_string()).unwrap();
 
