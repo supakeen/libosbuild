@@ -1,9 +1,9 @@
 [package]
-name = "lib_osbuild"
+name = "osbuild"
 version = "0.1.0"
 edition = "2021"
 authors = ["supakeen <supakeen@redhat.com>"]
-description = "Library for implementing `osbuild` modules."
+description = "`osbuild` library modules."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

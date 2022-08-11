@@ -1,4 +1,4 @@
-// You're reading the source code for `lib_osbuild`, a Rust library that provides the primitives
+// You're reading the source code for `osbuild`, a Rust library that provides the primitives
 // to implement modules for `osbuild`.
 //
 // OSBuild is a pipeline-based build system for operating system artifacts. It defines a
@@ -8,6 +8,17 @@
 //
 // You can find out more on [osbuild's homepage](https://osbuild.org/) or
 // [osbuild's GitHub](https://github.com/osbuild/osbuild).
+
+/// Manifest tasks
+pub mod manifest {}
+
+/// Dependency tasks
+pub mod dependency {
+    pub mod solver {}
+}
+
+/// Sandbox tasks
+pub mod sandbox {}
 
 /// Traits for implementing osbuild modules such as assemblers, sources, or stages.
 pub mod module {
@@ -30,7 +41,10 @@ pub mod module {
     pub enum StageError {}
 
     pub trait Stage {}
+}
 
+/// Communication tasks
+pub mod communication {
     /// Modules are executed in a sandbox and talk to the main osbuild process on the host
     /// machine through a transport. The `channel` module provides abstractions for an `osbuild`
     /// module to talk to the host system.
@@ -482,7 +496,7 @@ pub mod module {
         /// where modules are executed and the host system. It allows for sending `Message`'s back
         /// and forth and the setup of communications.
         pub trait Channel {
-            /// Prepare a channel with new_default settings as proposed by the `lib_osbuild` version.
+            /// Prepare a channel with new_default settings as proposed by the `osbuild` version.
             fn new_default() -> Result<Self, ChannelError>
             where
                 Self: Sized;
@@ -613,6 +627,11 @@ pub mod module {
     }
 }
 
-/// Dependency solving tasks
-pub mod dependencies {
+/// Bindings as generated for various languages.
+pub mod binding {
+    /// `pyo3` bindings for Python
+    pub mod python {}
+
+    /// `rustgo` bindings for Go
+    pub mod rustgo {}
 }
