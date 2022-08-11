@@ -1,6 +1,5 @@
-// You're reading the source code for `osbuild`, a Rust library that provides the primitives
+// You're reading the source code for `libosbuild`, a Rust library that provides the primitives
 // to implement modules for `osbuild`.
-//
 // OSBuild is a pipeline-based build system for operating system artifacts. It defines a
 // universal pipeline description and a build system to execute them, producing artifacts like
 // operating system images, working towards an image build pipeline that is more comprehensible,
@@ -625,13 +624,4 @@ pub mod communication {
             }
         }
     }
-}
-
-/// Bindings as generated for various languages.
-pub mod binding {
-    /// `pyo3` bindings for Python
-    pub mod python {}
-
-    /// `rustgo` bindings for Go
-    pub mod rustgo {}
 }

@@ -1,0 +1,12 @@
+[package]
+name = "libosbuild-py"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "libosbuild_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+libosbuild = { path = "../libosbuild" }
+pyo3 = { version = "0.16.5", features = ["extension-module"] }

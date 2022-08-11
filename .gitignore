@@ -1,2 +1,5 @@
 /target
-/Cargo.lock
+
+/libosbuild/target
+/libosbuild-py/target
+/libosbuild-go/target
