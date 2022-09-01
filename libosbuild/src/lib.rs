@@ -625,3 +625,11 @@ pub mod communication {
         }
     }
 }
+
+/// Interfacing with external dependencies, small wrapper APIs and such.
+pub mod external {
+
+    /// Interfacing with `ostree-rs`
+    pub mod ostree {
+    }
+}
