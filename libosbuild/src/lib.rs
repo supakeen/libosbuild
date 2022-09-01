@@ -629,7 +629,7 @@ pub mod communication {
 /// Interfacing with external dependencies, small wrapper APIs and such.
 pub mod external {
 
-    /// Interfacing with `ostree-rs`
+    /// Interfacing with `ostree` and `ostree-ext` Rust libraries
     pub mod ostree {
     }
 }
