@@ -640,7 +640,6 @@ pub mod external {
     pub mod ostree {
         pub mod container {
             pub fn encapsulate() {}
-
             pub fn unencapsulate() {}
         }
     }
