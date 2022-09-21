@@ -4,7 +4,7 @@ A library providing commonly used operations for the [osbuild](https://osbuild.o
 
 ## `libosbuild`
 
-The Rust library itself.
+The Rust library itself. This library implements primitives for use by `osbuild` projects.
 
 ## `libosbuild-ffi`
 
