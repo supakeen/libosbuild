@@ -25,6 +25,3 @@ pub mod sandbox;
 
 /// Traits for implementing osbuild modules such as assemblers, sources, or stages.
 pub mod module;
-
-/// Communication tasks
-pub mod communication;
