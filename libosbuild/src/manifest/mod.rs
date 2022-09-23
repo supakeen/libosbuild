@@ -2,6 +2,7 @@
 /// JSON descriptions into manifests.
 pub mod description;
 pub mod meta;
+pub mod validate;
 
 #[derive(Debug)]
 pub enum ManifestError {}
