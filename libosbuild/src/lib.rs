@@ -40,6 +40,8 @@ pub mod manifest {
     pub mod description {
         /// Version 1 of manifest descriptions, this version is *DEPRECATED*.
         pub mod v1 {
+            use crate::manifest::*;
+
             pub struct ManifestDescription {}
 
             impl ManifestDescription {
@@ -65,6 +67,8 @@ pub mod manifest {
 
         /// Version 2 of manifest descriptions, this version is current.
         pub mod v2 {
+            use crate::manifest::*;
+
             pub struct ManifestDescription {}
 
             impl ManifestDescription {
