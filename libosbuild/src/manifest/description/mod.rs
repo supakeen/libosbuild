@@ -12,8 +12,8 @@ pub enum ManifestDescriptionError {}
 
 // XXX naming!
 enum ValidationPath {
-    string(String),
-    number(usize),
+    Name(String),
+    Index(usize),
 }
 
 /// Describes a single failed validation. Consists of a `message` describing the error and a `path`
@@ -34,14 +34,14 @@ impl ValidationError {
 
         for part in self.path.into_iter() {
             match part {
-                ValidationPath::string(path) => {
+                ValidationPath::Name(path) => {
                     if path.contains(" ") {
                         result = format!("{}.'{}'", result, path);
                     } else {
                         result = format!("{}.{}", result, path);
                     }
                 }
-                ValidationPath::number(path) => {
+                ValidationPath::Index(path) => {
                     result = format!("{}[{}]", result, path);
                 }
             }
@@ -93,7 +93,7 @@ mod test {
     fn validation_error_id() {
         let test0 = ValidationError {
             message: String::new(),
-            path: vec![ValidationPath::string("foo".to_string())],
+            path: vec![ValidationPath::Name("foo".to_string())],
         };
 
         assert_eq!(test0.id().unwrap(), ".foo".to_string());
@@ -101,8 +101,8 @@ mod test {
         let test1 = ValidationError {
             message: String::new(),
             path: vec![
-                ValidationPath::string("foo".to_string()),
-                ValidationPath::string("bar".to_string()),
+                ValidationPath::Name("foo".to_string()),
+                ValidationPath::Name("bar".to_string()),
             ],
         };
 
@@ -111,9 +111,9 @@ mod test {
         let test2 = ValidationError {
             message: String::new(),
             path: vec![
-                ValidationPath::string("foo".to_string()),
-                ValidationPath::string("bar".to_string()),
-                ValidationPath::number(1337),
+                ValidationPath::Name("foo".to_string()),
+                ValidationPath::Name("bar".to_string()),
+                ValidationPath::Index(1337),
             ],
         };
 
@@ -122,10 +122,10 @@ mod test {
         let test3 = ValidationError {
             message: String::new(),
             path: vec![
-                ValidationPath::string("foo".to_string()),
-                ValidationPath::number(42),
-                ValidationPath::string("bar".to_string()),
-                ValidationPath::number(1337),
+                ValidationPath::Name("foo".to_string()),
+                ValidationPath::Index(42),
+                ValidationPath::Name("bar".to_string()),
+                ValidationPath::Index(1337),
             ],
         };
 
