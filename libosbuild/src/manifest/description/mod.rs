@@ -10,8 +10,7 @@ pub mod v2;
 #[derive(Debug)]
 pub enum ManifestDescriptionError {}
 
-// XXX naming!
-enum ValidationPath {
+pub enum ValidationPath {
     Name(String),
     Index(usize),
 }
@@ -24,30 +23,29 @@ pub struct ValidationError {
 }
 
 impl ValidationError {
-    // XXX error type?
-    fn id(self) -> Result<String, ManifestDescriptionError> {
+    fn id(self) -> String {
         if self.path.is_empty() {
-            return Ok(".".to_string());
-        }
+            ".".to_string()
+        } else {
+            let mut result = String::new();
 
-        let mut result = String::new();
-
-        for part in self.path.into_iter() {
-            match part {
-                ValidationPath::Name(path) => {
-                    if path.contains(' ') {
-                        result = format!("{}.'{}'", result, path);
-                    } else {
-                        result = format!("{}.{}", result, path);
+            for part in self.path.into_iter() {
+                match part {
+                    ValidationPath::Name(path) => {
+                        if path.contains(' ') {
+                            result = format!("{}.'{}'", result, path);
+                        } else {
+                            result = format!("{}.{}", result, path);
+                        }
+                    }
+                    ValidationPath::Index(path) => {
+                        result = format!("{}[{}]", result, path);
                     }
                 }
-                ValidationPath::Index(path) => {
-                    result = format!("{}[{}]", result, path);
-                }
             }
-        }
 
-        Ok(result)
+            result
+        }
     }
 }
 
@@ -96,7 +94,7 @@ mod test {
             path: vec![ValidationPath::Name("foo".to_string())],
         };
 
-        assert_eq!(test0.id().unwrap(), ".foo".to_string());
+        assert_eq!(test0.id(), ".foo".to_string());
 
         let test1 = ValidationError {
             message: String::new(),
@@ -106,7 +104,7 @@ mod test {
             ],
         };
 
-        assert_eq!(test1.id().unwrap(), ".foo.bar".to_string());
+        assert_eq!(test1.id(), ".foo.bar".to_string());
 
         let test2 = ValidationError {
             message: String::new(),
@@ -117,7 +115,7 @@ mod test {
             ],
         };
 
-        assert_eq!(test2.id().unwrap(), ".foo.bar[1337]".to_string());
+        assert_eq!(test2.id(), ".foo.bar[1337]".to_string());
 
         let test3 = ValidationError {
             message: String::new(),
@@ -129,7 +127,7 @@ mod test {
             ],
         };
 
-        assert_eq!(test3.id().unwrap(), ".foo[42].bar[1337]".to_string());
+        assert_eq!(test3.id(), ".foo[42].bar[1337]".to_string());
 
         // XXX is this even legal? If it was it's at least supposed to be `.[42][1337]`?,
         // XXX verify with Python side.
@@ -138,6 +136,6 @@ mod test {
             path: vec![ValidationPath::Index(42), ValidationPath::Index(1337)],
         };
 
-        assert_eq!(test4.id().unwrap(), "[42][1337]".to_string());
+        assert_eq!(test4.id(), "[42][1337]".to_string());
     }
 }
