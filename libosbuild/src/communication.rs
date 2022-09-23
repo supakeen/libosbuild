@@ -308,28 +308,18 @@ pub mod channel {
                 }
 
                 pub trait Encoding {
-                    fn encode<T: Serialize>(&self, object: T)
-                        -> Result<Vec<u8>, EncodingError>;
-                    fn decode<T: DeserializeOwned>(
-                        &self,
-                        data: &str,
-                    ) -> Result<T, EncodingError>;
+                    fn encode<T: Serialize>(&self, object: T) -> Result<Vec<u8>, EncodingError>;
+                    fn decode<T: DeserializeOwned>(&self, data: &str) -> Result<T, EncodingError>;
                 }
 
                 pub struct JSONEncoding {}
 
                 impl Encoding for JSONEncoding {
-                    fn encode<T: Serialize>(
-                        &self,
-                        object: T,
-                    ) -> Result<Vec<u8>, EncodingError> {
+                    fn encode<T: Serialize>(&self, object: T) -> Result<Vec<u8>, EncodingError> {
                         Ok(serde_json::to_vec(&object)?)
                     }
 
-                    fn decode<T: DeserializeOwned>(
-                        &self,
-                        data: &str,
-                    ) -> Result<T, EncodingError> {
+                    fn decode<T: DeserializeOwned>(&self, data: &str) -> Result<T, EncodingError> {
                         Ok(serde_json::from_str(data)?)
                     }
                 }
@@ -578,4 +568,3 @@ pub mod channel {
         }
     }
 }
-

@@ -33,7 +33,9 @@ pub mod description {
         }
 
         fn describe(manifest: Manifest, with_id: bool) -> Result<Manifest, ManifestError> {
-            Ok(Manifest { version: Version::V1 })
+            Ok(Manifest {
+                version: Version::V1,
+            })
         }
 
         pub struct Validator {
@@ -64,7 +66,9 @@ pub mod description {
         }
 
         fn describe(manifest: Manifest, with_id: bool) -> Result<Manifest, ManifestError> {
-            Ok(Manifest { version: Version::V2 })
+            Ok(Manifest {
+                version: Version::V2,
+            })
         }
 
         pub struct Validator {
