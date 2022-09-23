@@ -35,53 +35,59 @@ pub mod manifest {
         manifest: Manifest,
     }
 
-    pub mod v1 {
-        pub struct ManifestDescription {}
+    /// Manifests are described in JSON, this module provides functions and objects to parse those
+    /// JSON descriptions into manifests.
+    pub mod description {
+        /// Version 1 of manifest descriptions, this version is *DEPRECATED*.
+        pub mod v1 {
+            pub struct ManifestDescription {}
 
-        impl ManifestDescription {
-            fn load(&self) {}
-            fn load_assembler(&self) {}
-            fn load_build(&self) {}
-            fn load_pipeline(&self) {}
-            fn load_source(&self) {}
-            fn load_stage(&self) {}
+            impl ManifestDescription {
+                fn load(&self) {}
+                fn load_assembler(&self) {}
+                fn load_build(&self) {}
+                fn load_pipeline(&self) {}
+                fn load_source(&self) {}
+                fn load_stage(&self) {}
+            }
+
+            pub struct Validator {
+                manifest: Manifest,
+            }
+
+            impl Validator {
+                fn validate_module(&self) {}
+                fn validate_pipeline(&self) {}
+                fn validate_stage(&self) {}
+                fn validate_stage_modules(&self) {}
+            }
         }
 
-        pub struct Validator {
-            manifest: Manifest,
-        }
+        /// Version 2 of manifest descriptions, this version is current.
+        pub mod v2 {
+            pub struct ManifestDescription {}
 
-        impl Validator {
-            fn validate_module(&self) {}
-            fn validate_pipeline(&self) {}
-            fn validate_stage(&self) {}
-            fn validate_stage_modules(&self) {}
-        }
-    }
+            impl ManifestDescription {
+                fn load(&self) {}
+                fn load_device(&self) {}
+                fn load_input(&self) {}
+                fn load_mount(&self) {}
+                fn load_pipeline(&self) {}
+                fn load_stage(&self) {}
+            }
 
-    pub mod v2 {
-        pub struct ManifestDescription {}
+            fn describe(manifest: Manifest, with_id: bool) {}
 
-        impl ManifestDescription {
-            fn load(&self) {}
-            fn load_device(&self) {}
-            fn load_input(&self) {}
-            fn load_mount(&self) {}
-            fn load_pipeline(&self) {}
-            fn load_stage(&self) {}
-        }
+            pub struct Validator {
+                manifest: Manifest,
+            }
 
-        fn describe(manifest: Manifest, with_id: bool) {}
-
-        pub struct Validator {
-            manifest: Manifest,
-        }
-
-        impl Validator {
-            fn validate_module(&self) {}
-            fn validate_pipeline(&self) {}
-            fn validate_stage(&self) {}
-            fn validate_stage_modules(&self) {}
+            impl Validator {
+                fn validate_module(&self) {}
+                fn validate_pipeline(&self) {}
+                fn validate_stage(&self) {}
+                fn validate_stage_modules(&self) {}
+            }
         }
     }
 }
