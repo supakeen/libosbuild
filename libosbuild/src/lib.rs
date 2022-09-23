@@ -8,6 +8,9 @@
 // You can find out more on [osbuild's homepage](https://osbuild.org/) or
 // [osbuild's GitHub](https://github.com/osbuild/osbuild).
 
+/// Core tasks, providing all functionality of the main `osbuild` executable.
+pub mod core {}
+
 /// Manifest tasks
 pub mod manifest {}
 
