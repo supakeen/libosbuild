@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: sudo apt-get install libostree-1-1 libostree-dev libssl-dev
+      run: sudo apt-get install libssl-dev
     - name: Build source
       run: cargo build --verbose
     - name: Run tests

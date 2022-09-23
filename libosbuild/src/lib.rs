@@ -625,22 +625,3 @@ pub mod communication {
         }
     }
 }
-
-/// Interfacing with external dependencies, small wrapper APIs and such.
-pub mod external {
-    /// Interfacing with `ostree` and `ostree-ext` Rust libraries The `ostree` project is bindings
-    /// to the `libostree` C library. `ostree-ext` adds additional higher level APIs on top of
-    /// that. We then wrap them here to expose them to our downstream users (`osbuild` et al).
-    ///
-    /// Since our downstream users do not use asynchronous code we don't provide it here and
-    /// instead turn any async defs back into sync calls.
-    ///
-    /// XXX: do we want to reimplement these functions from `ostree-ext` instead? Seems a bit weird
-    /// XXX: to go into `-ext` like this and then disabling what it offers.
-    pub mod ostree {
-        pub mod container {
-            pub fn encapsulate() {}
-            pub fn unencapsulate() {}
-        }
-    }
-}
