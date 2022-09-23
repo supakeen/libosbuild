@@ -36,16 +36,15 @@ pub mod manifest {
     }
 
     pub mod v1 {
-        pub struct Manifest {
-        }
+        pub struct Manifest {}
 
         impl Manifest {
+            fn load(&self) {}
             fn load_device(&self) {}
             fn load_input(&self) {}
             fn load_mount(&self) {}
-            fn load_stage(&self) {}
             fn load_pipeline(&self) {}
-            fn load(&self) {}
+            fn load_stage(&self) {}
         }
 
         pub struct Validator {
@@ -54,23 +53,22 @@ pub mod manifest {
 
         impl Validator {
             fn validate_module(&self) {}
-            fn validate_stage_modules(&self) {}
-            fn validate_stage(&self) {}
             fn validate_pipeline(&self) {}
+            fn validate_stage(&self) {}
+            fn validate_stage_modules(&self) {}
         }
     }
 
     pub mod v2 {
-        pub struct Manifest {
-        }
+        pub struct Manifest {}
 
         impl Manifest {
+            fn load(&self) {}
             fn load_device(&self) {}
             fn load_input(&self) {}
             fn load_mount(&self) {}
-            fn load_stage(&self) {}
             fn load_pipeline(&self) {}
-            fn load(&self) {}
+            fn load_stage(&self) {}
         }
 
         pub struct Validator {
@@ -79,9 +77,9 @@ pub mod manifest {
 
         impl Validator {
             fn validate_module(&self) {}
-            fn validate_stage_modules(&self) {}
-            fn validate_stage(&self) {}
             fn validate_pipeline(&self) {}
+            fn validate_stage(&self) {}
+            fn validate_stage_modules(&self) {}
         }
     }
 }
