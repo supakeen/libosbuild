@@ -30,6 +30,60 @@ pub mod manifest {
     pub struct Manifest {
         version: Version,
     }
+
+    pub struct Validator {
+        manifest: Manifest,
+    }
+
+    pub mod v1 {
+        pub struct Manifest {
+        }
+
+        impl Manifest {
+            fn load_device(&self) {}
+            fn load_input(&self) {}
+            fn load_mount(&self) {}
+            fn load_stage(&self) {}
+            fn load_pipeline(&self) {}
+            fn load(&self) {}
+        }
+
+        pub struct Validator {
+            manifest: Manifest,
+        }
+
+        impl Validator {
+            fn validate_module(&self) {}
+            fn validate_stage_modules(&self) {}
+            fn validate_stage(&self) {}
+            fn validate_pipeline(&self) {}
+        }
+    }
+
+    pub mod v2 {
+        pub struct Manifest {
+        }
+
+        impl Manifest {
+            fn load_device(&self) {}
+            fn load_input(&self) {}
+            fn load_mount(&self) {}
+            fn load_stage(&self) {}
+            fn load_pipeline(&self) {}
+            fn load(&self) {}
+        }
+
+        pub struct Validator {
+            manifest: Manifest,
+        }
+
+        impl Validator {
+            fn validate_module(&self) {}
+            fn validate_stage_modules(&self) {}
+            fn validate_stage(&self) {}
+            fn validate_pipeline(&self) {}
+        }
+    }
 }
 
 /// Dependency tasks
