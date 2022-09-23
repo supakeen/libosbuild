@@ -36,14 +36,14 @@ pub mod manifest {
     }
 
     pub mod v1 {
-        pub struct Manifest {}
+        pub struct ManifestDescription {}
 
-        impl Manifest {
+        impl ManifestDescription {
             fn load(&self) {}
-            fn load_device(&self) {}
-            fn load_input(&self) {}
-            fn load_mount(&self) {}
+            fn load_assembler(&self) {}
+            fn load_build(&self) {}
             fn load_pipeline(&self) {}
+            fn load_source(&self) {}
             fn load_stage(&self) {}
         }
 
@@ -60,9 +60,9 @@ pub mod manifest {
     }
 
     pub mod v2 {
-        pub struct Manifest {}
+        pub struct ManifestDescription {}
 
-        impl Manifest {
+        impl ManifestDescription {
             fn load(&self) {}
             fn load_device(&self) {}
             fn load_input(&self) {}
@@ -70,6 +70,8 @@ pub mod manifest {
             fn load_pipeline(&self) {}
             fn load_stage(&self) {}
         }
+
+        fn describe(manifest: Manifest, with_id: bool) {}
 
         pub struct Validator {
             manifest: Manifest,
