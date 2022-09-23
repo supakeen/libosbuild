@@ -8,8 +8,10 @@ The Rust library itself. This library implements primitives for use by `osbuild`
 
 ## `libosbuild-ffi`
 
-FFI bindings for `libosbuild`.
+FFI bindings for `libosbuild` so any other language (Go, for example) can call into libosbuild
+directly.
 
 ## `libosbuild-py`
 
-Python bindings for `libosbuild`.
+Python bindings for `libosbuild` provided through PyO3, this allows for easier interfacing
+with Python code.
