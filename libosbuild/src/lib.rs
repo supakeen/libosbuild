@@ -11,6 +11,12 @@
 /// Core tasks, providing all functionality of the main `osbuild` executable.
 pub mod core {}
 
+/// Preprocessor tasks, providing all functionality of the `osbuild-mpp` executable.
+pub mod preprocessor {
+    #[derive(Debug)]
+    pub enum PreprocessorError {}
+}
+
 /// Manifest tasks
 pub mod manifest {
     #[derive(Debug)]
