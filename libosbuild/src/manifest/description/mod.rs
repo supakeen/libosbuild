@@ -135,15 +135,18 @@ mod test {
         };
 
         assert_eq!(test3.id(), ".foo[42].bar[1337]".to_string());
+    }
 
+    #[test]
+    fn validation_error_double_index() {
         // XXX is this even legal? If it was it's at least supposed to be `.[42][1337]`?,
         // XXX verify with Python side.
-        let test4 = ValidationError {
+        let test0 = ValidationError {
             message: String::new(),
             path: vec![ValidationPath::Index(42), ValidationPath::Index(1337)],
         };
 
-        assert_eq!(test4.id(), "[42][1337]".to_string());
+        assert_eq!(test0.id(), "[42][1337]".to_string());
     }
 
     #[test]
@@ -157,10 +160,7 @@ mod test {
     #[test]
     fn validation_result_error_invalid() {
         let mut result = ValidationResult::new(String::new());
-        result.add(ValidationError {
-            message: String::new(),
-            path: vec![],
-        });
+        result.fail("booboo".to_string());
 
         let valid: bool = result.into();
 
