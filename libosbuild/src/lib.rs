@@ -53,6 +53,10 @@ pub mod manifest {
                 fn load_stage(&self) {}
             }
 
+            fn describe(manifest: Manifest, with_id: bool) -> Result<Manifest, ManifestError> {
+                Ok(Manifest { version: Version::V1 })
+            }
+
             pub struct Validator {
                 manifest: Manifest,
             }
@@ -80,7 +84,9 @@ pub mod manifest {
                 fn load_stage(&self) {}
             }
 
-            fn describe(manifest: Manifest, with_id: bool) {}
+            fn describe(manifest: Manifest, with_id: bool) -> Result<Manifest, ManifestError> {
+                Ok(Manifest { version: Version::V2 })
+            }
 
             pub struct Validator {
                 manifest: Manifest,
