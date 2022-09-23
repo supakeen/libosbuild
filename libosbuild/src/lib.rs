@@ -12,7 +12,19 @@
 pub mod core {}
 
 /// Manifest tasks
-pub mod manifest {}
+pub mod manifest {
+    #[derive(Debug)]
+    pub enum ManifestError {}
+
+    pub enum Version {
+        V1,
+        V2,
+    }
+
+    pub struct Manifest {
+        version: Version,
+    }
+}
 
 /// Dependency tasks
 pub mod dependency {
