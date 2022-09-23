@@ -19,26 +19,26 @@ use std::str;
 
 #[derive(Debug)]
 pub enum ChannelError {
-    TransportError(transport::TransportError),
-    ProtocolError(protocol::ProtocolError),
-    EncodingError(protocol::message::encoding::EncodingError),
+    Transport(transport::TransportError),
+    Protocol(protocol::ProtocolError),
+    Encoding(protocol::message::encoding::EncodingError),
 }
 
 impl From<transport::TransportError> for ChannelError {
     fn from(err: transport::TransportError) -> Self {
-        Self::TransportError(err)
+        Self::Transport(err)
     }
 }
 
 impl From<protocol::ProtocolError> for ChannelError {
     fn from(err: protocol::ProtocolError) -> Self {
-        Self::ProtocolError(err)
+        Self::Protocol(err)
     }
 }
 
 impl From<protocol::message::encoding::EncodingError> for ChannelError {
     fn from(err: protocol::message::encoding::EncodingError) -> Self {
-        Self::EncodingError(err)
+        Self::Encoding(err)
     }
 }
 

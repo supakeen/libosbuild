@@ -26,7 +26,7 @@ pub struct ValidationError {
 impl ValidationError {
     // XXX error type?
     fn id(self) -> Result<String, ManifestDescriptionError> {
-        if self.path.len() == 0 {
+        if self.path.is_empty() {
             return Ok(".".to_string());
         }
 
@@ -35,7 +35,7 @@ impl ValidationError {
         for part in self.path.into_iter() {
             match part {
                 ValidationPath::Name(path) => {
-                    if path.contains(" ") {
+                    if path.contains(' ') {
                         result = format!("{}.'{}'", result, path);
                     } else {
                         result = format!("{}.{}", result, path);
@@ -65,7 +65,7 @@ impl ValidationResult {
     /// Add a new `ValidationError` with `message` as message
     fn fail(&mut self, message: String) {
         self.add(ValidationError {
-            message: message,
+            message,
             path: Vec::new(),
         });
     }
@@ -81,7 +81,7 @@ impl ValidationResult {
 
 impl From<ValidationResult> for bool {
     fn from(object: ValidationResult) -> bool {
-        object.errors.len() == 0
+        object.errors.is_empty()
     }
 }
 
