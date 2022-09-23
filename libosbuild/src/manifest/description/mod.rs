@@ -55,6 +55,13 @@ pub struct ValidationResult {
 }
 
 impl ValidationResult {
+    fn new(origin: String) -> Self {
+        Self {
+            origin: Some(origin),
+            errors: vec![],
+        }
+    }
+
     /// Add a `ValidationError` to the set of errors
     fn add(&mut self, error: ValidationError) {
         self.errors.push(error);
@@ -137,5 +144,26 @@ mod test {
         };
 
         assert_eq!(test4.id(), "[42][1337]".to_string());
+    }
+
+    #[test]
+    fn validation_result_no_error_valid() {
+        let result = ValidationResult::new(String::new());
+        let valid: bool = result.into();
+
+        assert_eq!(valid, true);
+    }
+
+    #[test]
+    fn validation_result_error_invalid() {
+        let mut result = ValidationResult::new(String::new());
+        result.add(ValidationError {
+            message: String::new(),
+            path: vec![],
+        });
+
+        let valid: bool = result.into();
+
+        assert_eq!(valid, false);
     }
 }
