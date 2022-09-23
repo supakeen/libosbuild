@@ -72,7 +72,7 @@ impl ValidationResult {
 
     /// Merge all errors of `result` into this `ValidationResult` adjusting their paths by
     /// pre-pending the optionally supplied `path`
-    fn merge(&mut self, result: ValidationResult, path: Option<String>) {
+    fn merge(&mut self, result: ValidationResult, path: Vec<ValidationPath>) {
         for error in result.errors {
             self.add(error);
         }
