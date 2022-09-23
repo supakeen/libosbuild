@@ -131,9 +131,7 @@ pub mod message {
                 };
 
                 assert!(encoding
-                    .decode::<Reply>(
-                        str::from_utf8(&encoding.encode(reply).unwrap()).unwrap()
-                    )
+                    .decode::<Reply>(str::from_utf8(&encoding.encode(reply).unwrap()).unwrap())
                     .is_ok());
             }
 
@@ -149,9 +147,7 @@ pub mod message {
                 };
 
                 assert!(encoding
-                    .decode::<Method>(
-                        str::from_utf8(&encoding.encode(method).unwrap()).unwrap()
-                    )
+                    .decode::<Method>(str::from_utf8(&encoding.encode(method).unwrap()).unwrap())
                     .is_ok());
             }
 
@@ -164,9 +160,7 @@ pub mod message {
                 };
 
                 assert!(encoding
-                    .decode::<Signal>(
-                        str::from_utf8(&encoding.encode(signal).unwrap()).unwrap()
-                    )
+                    .decode::<Signal>(str::from_utf8(&encoding.encode(signal).unwrap()).unwrap())
                     .is_ok());
             }
 

@@ -1,7 +1,7 @@
 /// Transports define the underlying method used to send and receive raw bytes. This is
 /// usually an AF_UNIX socket set to SOCK_DGRAM but premature abstraction has led to
 /// this being swappable if ever necessary (say: AF_INET + SOCK_STREAM).
-pub mod transport; 
+pub mod transport;
 
 /// Protocols define how to interpret the bytes sent over a `Transport` into the message
 /// objects expected.
@@ -145,9 +145,7 @@ mod test {
         let sock = UnixDatagram::bind(path.to_string()).unwrap();
 
         let mut channel = CommandChannel {
-            transport: Box::new(
-                transport::UnixDGRAMSocket::new(path.to_string(), None).unwrap(),
-            ),
+            transport: Box::new(transport::UnixDGRAMSocket::new(path.to_string(), None).unwrap()),
             protocol: Box::new(protocol::JSONProtocol {}),
         };
 
