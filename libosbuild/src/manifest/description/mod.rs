@@ -130,5 +130,14 @@ mod test {
         };
 
         assert_eq!(test3.id().unwrap(), ".foo[42].bar[1337]".to_string());
+
+        // XXX is this even legal? If it was it's at least supposed to be `.[42][1337]`?,
+        // XXX verify with Python side.
+        let test4 = ValidationError {
+            message: String::new(),
+            path: vec![ValidationPath::Index(42), ValidationPath::Index(1337)],
+        };
+
+        assert_eq!(test4.id().unwrap(), "[42][1337]".to_string());
     }
 }
