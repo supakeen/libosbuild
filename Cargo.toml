@@ -5,4 +5,5 @@ members = [
     "libosbuild-ffi",
     "osbuild-cli",
     "osbuild-api",
+    "osbuild-mpp",
 ]

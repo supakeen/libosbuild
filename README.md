@@ -11,6 +11,10 @@ The command line interface to `osbuild`.
 Another command line interface to osbuild, for use in `libexec`; takes in JSON and outputs only
 JSON.
 
+## `osbuild-mpp`
+
+The manifest pre processor.
+
 ## `libosbuild`
 
 A library providing commonly used operations for the [osbuild](https://osbuild.org/) project.
