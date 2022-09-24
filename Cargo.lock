@@ -618,10 +618,16 @@ checksum = "074864da206b4973b84eb91683020dbefd6a8c3f0f38e054d93954e891935e4e"
 [[package]]
 name = "osbuild-api"
 version = "0.1.0"
+dependencies = [
+ "libosbuild",
+]
 
 [[package]]
 name = "osbuild-cli"
 version = "0.1.0"
+dependencies = [
+ "libosbuild",
+]
 
 [[package]]
 name = "parking_lot"
