@@ -17,3 +17,13 @@ pub struct Manifest {
 pub struct Validator {
     manifest: Manifest,
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn dummy() {
+        assert_eq!(1, 1);
+    }
+}

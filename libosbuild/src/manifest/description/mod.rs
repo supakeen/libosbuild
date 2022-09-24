@@ -9,3 +9,13 @@ pub mod v2;
 
 #[derive(Debug)]
 pub enum ManifestDescriptionError {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn dummy() {
+        assert_eq!(1, 1);
+    }
+}

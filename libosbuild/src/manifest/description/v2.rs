@@ -37,3 +37,13 @@ impl Validator {
     fn validate_stage(&self) {}
     fn validate_stage_modules(&self) {}
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn dummy() {
+        assert_eq!(1, 1);
+    }
+}
