@@ -1,9 +1,19 @@
-# `libosbuild`
+# `osbuild-rs`
 
-A library providing commonly used operations for the [osbuild](https://osbuild.org/) project.
+A Rust reimplementation of `osbuild` primitives and logic.
+
+## `osbuild-cli`
+
+The command line interface to `osbuild`.
+
+## `osbuild-api`
+
+Another command line interface to osbuild, for use in `libexec`; takes in JSON and outputs only
+JSON.
 
 ## `libosbuild`
 
+A library providing commonly used operations for the [osbuild](https://osbuild.org/) project.
 The Rust library itself. This library implements primitives for use by `osbuild` projects.
 
 ## `libosbuild-ffi`

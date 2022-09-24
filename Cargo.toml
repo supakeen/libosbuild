@@ -3,4 +3,6 @@ members = [
     "libosbuild",
     "libosbuild-py",
     "libosbuild-ffi",
+    "osbuild-cli",
+    "osbuild-api",
 ]
