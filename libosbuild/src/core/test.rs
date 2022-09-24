@@ -1,14 +1,17 @@
 use crate::core::*;
 
 #[test]
-fn validation_error_id() {
+fn validation_error_path_0() {
     let test0 = ValidationError {
         message: String::new(),
         path: vec![ValidationPath::Name("foo".to_string())],
     };
 
     assert_eq!(test0.id(), ".foo".to_string());
+}
 
+#[test]
+fn validation_error_path_1() {
     let test1 = ValidationError {
         message: String::new(),
         path: vec![
@@ -18,7 +21,10 @@ fn validation_error_id() {
     };
 
     assert_eq!(test1.id(), ".foo.bar".to_string());
+}
 
+#[test]
+fn validation_error_path_2() {
     let test2 = ValidationError {
         message: String::new(),
         path: vec![
@@ -29,7 +35,11 @@ fn validation_error_id() {
     };
 
     assert_eq!(test2.id(), ".foo.bar[1337]".to_string());
+}
 
+
+#[test]
+fn validation_error_path_3() {
     let test3 = ValidationError {
         message: String::new(),
         path: vec![
@@ -44,7 +54,7 @@ fn validation_error_id() {
 }
 
 #[test]
-fn validation_error_double_index() {
+fn validation_error_path_double_index() {
     // XXX is this even legal? If it was it's at least supposed to be `.[42][1337]`?,
     // XXX verify with Python side.
     let test0 = ValidationError {
