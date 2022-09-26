@@ -11,6 +11,8 @@ pub struct ValidationError {
 }
 
 impl ValidationError {
+    /// Calculate the id of a ValidationError, this is a dotted and subscripted string that points
+    /// to the element in the Manifest that triggered the error message.
     pub fn id(self) -> String {
         if self.path.is_empty() {
             ".".to_string()
