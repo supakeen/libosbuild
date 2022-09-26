@@ -37,7 +37,6 @@ fn validation_error_path_2() {
     assert_eq!(test2.id(), ".foo.bar[1337]".to_string());
 }
 
-
 #[test]
 fn validation_error_path_3() {
     let test3 = ValidationError {
