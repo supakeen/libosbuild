@@ -54,6 +54,21 @@ fn validation_error_path_3() {
 }
 
 #[test]
+fn validation_error_path_quoted() {
+    let test3 = ValidationError {
+        message: String::new(),
+        path: vec![
+            ValidationPath::Name("f oo".to_string()),
+            ValidationPath::Index(42),
+            ValidationPath::Name("ba r".to_string()),
+            ValidationPath::Index(1337),
+        ],
+    };
+
+    assert_eq!(test3.id(), ".'f oo'[42].'ba r'[1337]".to_string());
+}
+
+#[test]
 fn validation_error_path_double_index() {
     // XXX is this even legal? If it was it's at least supposed to be `.[42][1337]`?,
     // XXX verify with Python side.
