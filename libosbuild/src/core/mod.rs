@@ -87,14 +87,14 @@ struct Schema {
 
 impl Schema {
     // XXX ValidationError is a struct
-    pub fn check(self) -> ValidationResult {
+    pub fn is_valid(self) -> bool {
         let mut result = ValidationResult::new(self.name.unwrap());
 
         if self.data.is_none() {
             result.fail("could not find schema information".to_string());
         }
 
-        result
+        result.into()
     }
 
     pub fn validate(self, target: Schema) -> ValidationResult {
