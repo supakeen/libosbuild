@@ -68,6 +68,17 @@ fn validation_error_path_double_index() {
     };
 
     assert_eq!(test0.id(), "[42][1337]".to_string());
+
+    let test1 = ValidationError {
+        message: String::new(),
+        path: vec![
+            ValidationPath::Index(42),
+            ValidationPath::Name("bar".to_string()),
+            ValidationPath::Index(1337),
+        ],
+    };
+
+    assert_eq!(test1.id(), "[42].bar[1337]".to_string());
 }
 
 #[test]
