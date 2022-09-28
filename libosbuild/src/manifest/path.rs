@@ -102,5 +102,14 @@ pub mod test {
         ]);
 
         assert_eq!(format!("{}", test1), "[42].bar[1337]".to_string());
+
+        let test2 = Path(vec![
+            Part::Name("foo".to_string()),
+            Part::Index(42),
+            Part::Name("bar".to_string()),
+            Part::Index(1337),
+        ]);
+
+        assert_eq!(format!("{}", test2), ".foo[42].bar[1337]".to_string());
     }
 }
