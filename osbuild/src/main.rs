@@ -1,9 +1,9 @@
-use libosbuild::module::{Kind, Registry};
+use libosbuild::module::Registry;
 
 fn make_cli() -> clap::Command<'static> {
     clap::command!()
         .propagate_version(true)
-        .about("Upgrade a package or packages on your system")
+        .about("Build operating system images.")
         .arg(
             clap::arg!(-q --quiet "Quiet operation (less output)")
                 .required(false)
@@ -14,12 +14,13 @@ fn make_cli() -> clap::Command<'static> {
                 .required(false)
                 .conflicts_with("quiet"),
         )
+        .arg(clap::arg!(-m --module <module> "Path to module(s)").required(false))
+        .arg(clap::arg!(<manifest> "Path to manifest to build"))
 }
 
 fn main() {
     let _matches = make_cli().get_matches();
-
-    let registry = Registry::new_empty();
+    let _registry = Registry::new_empty();
 
     println!("Hello, world!");
 }
