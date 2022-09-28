@@ -10,7 +10,7 @@ A Rust reimplementation of `osbuild` primitives and logic.
 
 ### Functionality-in-Rust
 
-- [ ] Exposes Python bindings through `libosbuild` to `libostree`
+- [ ] Expose Python bindings through `libosbuild` to `libostree`
 
 ## Parts
 
