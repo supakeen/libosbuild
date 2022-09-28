@@ -1,41 +1,17 @@
-pub enum ValidationPath {
-    Name(String),
-    Index(usize),
-}
+pub mod manifest_path;
 
 /// Describes a single failed validation. Consists of a `message` describing the error and a `path`
 /// that points to the thing that caused the error.
 pub struct ValidationError {
     message: String,
-    path: Vec<ValidationPath>,
+    path: manifest_path::Path,
 }
 
 impl ValidationError {
     /// Calculate the id of a ValidationError, this is a dotted and subscripted string that points
     /// to the element in the Manifest that triggered the error message.
     pub fn id(self) -> String {
-        if self.path.is_empty() {
-            ".".to_string()
-        } else {
-            let mut result = String::new();
-
-            for part in self.path.into_iter() {
-                match part {
-                    ValidationPath::Name(path) => {
-                        if path.contains(' ') {
-                            result = format!("{}.'{}'", result, path);
-                        } else {
-                            result = format!("{}.{}", result, path);
-                        }
-                    }
-                    ValidationPath::Index(path) => {
-                        result = format!("{}[{}]", result, path);
-                    }
-                }
-            }
-
-            result
-        }
+        format!("{}", self.path)
     }
 }
 
@@ -61,13 +37,13 @@ impl ValidationResult {
     pub fn fail(&mut self, message: String) {
         self.add(ValidationError {
             message,
-            path: Vec::new(),
+            path: manifest_path::Path(Vec::new()),
         });
     }
 
     /// Merge all errors of `result` into this `ValidationResult` adjusting their paths by
     /// pre-pending the optionally supplied `path`
-    pub fn merge(&mut self, result: ValidationResult, path: Vec<ValidationPath>) {
+    pub fn merge(&mut self, result: ValidationResult, path: Vec<manifest_path::Path>) {
         for error in result.errors {
             self.add(error);
         }
