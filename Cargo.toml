@@ -6,4 +6,5 @@ members = [
     "osbuild-cli",
     "osbuild-api",
     "osbuild-mpp",
+    "osbuild-mod",
 ]

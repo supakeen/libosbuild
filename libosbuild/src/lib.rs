@@ -14,7 +14,9 @@ pub mod core;
 /// Preprocessor tasks, providing all functionality of the `osbuild-mpp` executable.
 pub mod preprocessor;
 
-/// Manifest tasks
+/// Manifests describe builds of operating systems. They are usually exchanged as 'descriptions',
+/// which is a JSON serialized manifest. Schemas validate the manifest descriptions so we can make
+/// sure that a Manifest can be deserialized from a description.
 pub mod manifest;
 
 /// Dependency tasks
@@ -23,5 +25,6 @@ pub mod dependency;
 /// Sandbox tasks
 pub mod sandbox;
 
-/// Traits for implementing osbuild modules such as assemblers, sources, or stages.
+/// The work in osbuild is performed by modules, there are several types of modules. The `module`
+/// module provides primitives, traits, and helpers to implement your own modules.
 pub mod module;

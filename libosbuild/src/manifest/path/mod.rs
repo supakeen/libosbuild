@@ -1,6 +1,10 @@
+/// Manifests are trees, that means that we can describe a location in them as a path. This is used
+/// for showing progress output, schema and validation errors of descriptions, and useful for
+/// debugging.
 use std::fmt;
 use std::ops;
 
+#[cfg(test)]
 pub mod test;
 
 pub enum Part {
@@ -12,7 +16,7 @@ pub struct Path(pub Vec<Part>);
 
 impl Path {
     pub fn new(path: Vec<Part>) -> Self {
-        Self { 0: path }
+        Self(path)
     }
 }
 
@@ -40,5 +44,11 @@ impl fmt::Display for Path {
                 Part::Index(path) => result.and_then(|_| write!(f, "[{}]", path)),
             })
         }
+    }
+}
+
+impl From<Path> for String {
+    fn from(object: Path) -> String {
+        format!("{}", object)
     }
 }

@@ -1,5 +1,3 @@
-/// Manifests are described in JSON, this module provides functions and objects to parse those
-/// JSON descriptions into manifests.
 pub mod description;
 pub mod path;
 
@@ -11,18 +9,10 @@ pub enum Version {
     V2,
 }
 
-pub struct Manifest {
-    version: Version,
-}
-
-pub struct Validator {
-    manifest: Manifest,
-}
+pub struct Manifest {}
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     #[test]
     fn dummy() {
         assert_eq!(1, 1);

@@ -7,13 +7,14 @@ pub mod v1;
 /// Version 2 of manifest descriptions, this version is current.
 pub mod v2;
 
+/// Validation for ManifestDescriptions.
+pub mod validation;
+
 #[derive(Debug)]
 pub enum ManifestDescriptionError {}
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     #[test]
     fn dummy() {
         assert_eq!(1, 1);

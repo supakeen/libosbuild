@@ -4,7 +4,6 @@ use std::os::unix::net::{UnixDatagram, UnixStream};
 #[derive(Debug)]
 pub enum TransportError {
     IOError(std::io::Error),
-    SocketError,
 }
 
 impl From<std::io::Error> for TransportError {
