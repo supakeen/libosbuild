@@ -1,4 +1,4 @@
-pub mod manifest_path;
+use crate::manifest::path as manifest_path;
 
 /// Describes a single failed validation. Consists of a `message` describing the error and a `path`
 /// that points to the thing that caused the error.

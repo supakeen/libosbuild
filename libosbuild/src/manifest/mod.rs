@@ -1,6 +1,7 @@
 /// Manifests are described in JSON, this module provides functions and objects to parse those
 /// JSON descriptions into manifests.
 pub mod description;
+pub mod path;
 
 #[derive(Debug)]
 pub enum ManifestError {}
