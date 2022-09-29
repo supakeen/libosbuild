@@ -10,3 +10,11 @@ fn libosbuild_py(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn dummy() {
+        assert!(true);
+    }
+}
