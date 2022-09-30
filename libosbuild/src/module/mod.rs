@@ -38,6 +38,13 @@ impl Registry<'_> {
         Self { modules: vec![] }
     }
 
+    /// Add the 'well-known' locations where `osbuild` modules might be located.
+    /// XXX: decide if we actually want this or if we always want to be explicit and only load data
+    /// from explicitly provided paths in the binaries.
+    pub fn add_well_known(&mut self) -> Result<(), RegistryError> {
+        Ok(())
+    }
+
     /// Find a module by its name.
     pub fn by_name(&self, name: &str) -> Option<&Module> {
         self.modules.iter().find(|&module| module.name == name)
@@ -62,7 +69,20 @@ pub enum Kind {
     Assembler,
     Source,
     Runner,
+    Mount,
+    Device,
+    Input,
 }
+
+// The default paths where certain modules are located on a default install, note that
+// compatibility should be checked on these XXX
+const WELL_KNOWN_MODULE_PATH_ASSEMBLER: &'static str = "/usr/lib/osbuild/assemblers";
+const WELL_KNOWN_MODULE_PATH_DEVICE: &'static str = "/usr/lib/osbuild/devices";
+const WELL_KNOWN_MODULE_PATH_INPUT: &'static str = "/usr/lib/osbuild/inputs";
+const WELL_KNOWN_MODULE_PATH_MOUNT: &'static str = "/usr/lib/osbuild/mounts";
+const WELL_KNOWN_MODULE_PATH_RUNNER: &'static str = "/usr/lib/osbuild/runners";
+const WELL_KNOWN_MODULE_PATH_SOURCE: &'static str = "/usr/lib/osbuild/sources";
+const WELL_KNOWN_MODULE_PATH_STAGE: &'static str = "/usr/lib/osbuild/stages";
 
 /// Errors that happen during execution of a module.
 #[derive(Debug)]

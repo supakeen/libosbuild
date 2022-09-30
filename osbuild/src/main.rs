@@ -20,7 +20,9 @@ fn make_cli() -> clap::Command<'static> {
 
 fn main() {
     let _matches = make_cli().get_matches();
-    let _registry = Registry::new_empty();
+
+    let mut registry = Registry::new_empty();
+    registry.add_well_known();
 
     println!("Hello, world!");
 }
