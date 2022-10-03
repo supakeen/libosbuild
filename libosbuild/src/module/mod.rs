@@ -76,13 +76,13 @@ pub enum Kind {
 
 // The default paths where certain modules are located on a default install, note that
 // compatibility should be checked on these XXX
-const WELL_KNOWN_MODULE_PATH_ASSEMBLER: &'static str = "/usr/lib/osbuild/assemblers";
-const WELL_KNOWN_MODULE_PATH_DEVICE: &'static str = "/usr/lib/osbuild/devices";
-const WELL_KNOWN_MODULE_PATH_INPUT: &'static str = "/usr/lib/osbuild/inputs";
-const WELL_KNOWN_MODULE_PATH_MOUNT: &'static str = "/usr/lib/osbuild/mounts";
-const WELL_KNOWN_MODULE_PATH_RUNNER: &'static str = "/usr/lib/osbuild/runners";
-const WELL_KNOWN_MODULE_PATH_SOURCE: &'static str = "/usr/lib/osbuild/sources";
-const WELL_KNOWN_MODULE_PATH_STAGE: &'static str = "/usr/lib/osbuild/stages";
+const WELL_KNOWN_MODULE_PATH_ASSEMBLER: &str = "/usr/lib/osbuild/assemblers";
+const WELL_KNOWN_MODULE_PATH_DEVICE: &str = "/usr/lib/osbuild/devices";
+const WELL_KNOWN_MODULE_PATH_INPUT: &str = "/usr/lib/osbuild/inputs";
+const WELL_KNOWN_MODULE_PATH_MOUNT: &str = "/usr/lib/osbuild/mounts";
+const WELL_KNOWN_MODULE_PATH_RUNNER: &str = "/usr/lib/osbuild/runners";
+const WELL_KNOWN_MODULE_PATH_SOURCE: &str = "/usr/lib/osbuild/sources";
+const WELL_KNOWN_MODULE_PATH_STAGE: &str = "/usr/lib/osbuild/stages";
 
 /// Errors that happen during execution of a module.
 #[derive(Debug)]
