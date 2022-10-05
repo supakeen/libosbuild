@@ -1,4 +1,4 @@
-# `osbuild-rs`
+# osbuild-rs
 
 A Rust reimplementation of `osbuild` primitives and logic.
 
