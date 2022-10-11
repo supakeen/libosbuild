@@ -45,7 +45,6 @@ fn fmt_path_quoted() {
 #[test]
 fn fmt_path_double_index() {
     // XXX is this even legal? If it was it's at least supposed to be `.[42][1337]`?,
-    // XXX verify with Python side.
     let test0 = Path(vec![Part::Index(42), Part::Index(1337)]);
 
     assert_eq!(format!("{}", test0), "[42][1337]".to_string());
