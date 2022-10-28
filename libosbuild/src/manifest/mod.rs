@@ -2,7 +2,8 @@ pub mod description;
 pub mod path;
 
 #[derive(Debug)]
-pub enum ManifestError {}
+pub enum ManifestError {
+}
 
 pub enum Version {
     V1,
